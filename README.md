@@ -1,3 +1,3 @@
 #Lang [WIP]
 
-To check out the development check out the `dev` branch 
+This is the dev branch and highly WIP 
