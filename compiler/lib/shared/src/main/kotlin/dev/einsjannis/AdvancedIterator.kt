@@ -34,7 +34,7 @@ class AdvancedIterator<T>(val list: List<T>) : ListIterator<T> {
         index = stack.pop()
     }
 
-    fun removeContext() {
+    fun clearContext() {
         stack.pop()
     }
 

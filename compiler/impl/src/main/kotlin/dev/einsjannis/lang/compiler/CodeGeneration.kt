@@ -10,7 +10,7 @@ object CodeGeneration {
 	fun generateModule(name: String, definitionScope: dev.einsjannis.lang.compiler.ir.DefinitionScope): Module {
 		val module = Module.new(name)
 		definitionScope.children.forEach { module.generateDefinition(it) }
-		TODO()
+		return module
 	}
 
 	fun Module.generateDefinition(definition: Definition) = when (definition) {
@@ -20,12 +20,11 @@ object CodeGeneration {
 	}
 
 	fun Module.generateFunction(functionDef: FunctionDefinition) {
-		TODO()
+		addFunction(functionDef.name, typeByName(functionDef.returnType.typeDefinition.name))
 	}
 
 	fun Module.generateStruct(structDefinition: StructDefinition) {
 		addStruct(structDefinition.name)
-		TODO()
 	}
 
 }

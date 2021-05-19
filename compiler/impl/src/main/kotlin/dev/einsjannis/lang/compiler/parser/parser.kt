@@ -198,7 +198,7 @@ object Patterns {
 
     object DefinitionScope : Pattern<IRDefinitionScope> {
 
-        override fun match(tokens: AdvancedIterator<dev.einsjannis.compiler.lexer.Token>): Match<IRDefinitionScope> {
+		override fun match(tokens: AdvancedIterator<dev.einsjannis.compiler.lexer.Token>): Match<IRDefinitionScope> {
             tokens.pushContext()
             val list = buildList {
                 while (true) {
@@ -221,7 +221,7 @@ object Patterns {
                     if (!tokens.hasNext()) break
                 }
             }
-            tokens.removeContext()
+            tokens.clearContext()
             return ValidMatch(DefinitionScopeImpl(list))
         }
 

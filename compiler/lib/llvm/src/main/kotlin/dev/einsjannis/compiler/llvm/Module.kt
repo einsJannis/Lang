@@ -1,12 +1,20 @@
 package dev.einsjannis.compiler.llvm
 
+import com.sun.jna.NativeLibrary
 import org.sosy_lab.llvm_j.binding.LLVMLibrary
+import java.io.File
 
 class Module private constructor(private val ref: LLVMLibrary.LLVMModuleRef) {
 
 	internal val contextRef get() = LLVMLibrary.LLVMGetModuleContext(ref)
 
 	companion object {
+
+		init {
+			val path = File("lib").absolutePath
+			NativeLibrary.addSearchPath("LLVM-6.0", path)
+			println(path)
+		}
 
 		fun new(name: String) : Module = Module(LLVMLibrary.LLVMModuleCreateWithName(name))
 
@@ -23,5 +31,8 @@ class Module private constructor(private val ref: LLVMLibrary.LLVMModuleRef) {
 
 		return Type(type)
 	}
+
+	fun typeByName(name: String): Type = Type(LLVMLibrary.LLVMGetTypeByName(ref, name))
+
 
 }
