@@ -1,6 +1,6 @@
 package dev.einsjannis.lang.compiler.ir
 
-interface VariableDefinition : Definition {
+interface VariableDefinition : Code, Definition {
 
     val initialization: Expression?
 
