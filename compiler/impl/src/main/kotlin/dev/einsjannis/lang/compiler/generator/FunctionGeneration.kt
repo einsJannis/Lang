@@ -2,7 +2,7 @@ package dev.einsjannis.lang.compiler.generator
 
 import dev.einsjannis.compiler.llvm.Function
 import dev.einsjannis.compiler.llvm.Module
-import dev.einsjannis.compiler.llvm.Variable
+import dev.einsjannis.compiler.llvm.NamedIRElement
 import dev.einsjannis.lang.compiler.generator.CodeGeneration.type
 import dev.einsjannis.lang.compiler.ir.*
 
@@ -11,7 +11,7 @@ class FunctionGeneration(val function: Function) {
 	var tempCount: Int = 0
 
 	fun addArgument(argumentDefinition: ArgumentDefinition) {
-		function.addArgument(argumentDefinition.name, function.module.type(argumentDefinition.returnType))
+		function.addArgument(argumentDefinition.name, TODO()/*function.module.type(argumentDefinition.returnType)*/)
 	}
 
 	fun addCode(code: Code): Unit {
@@ -25,19 +25,19 @@ class FunctionGeneration(val function: Function) {
 		}
 	}
 
-	fun addExpression(expression: Expression, varName: String? = null): Variable = when (expression) {
+	fun addExpression(expression: Expression, varName: String? = null): NamedIRElement = when (expression) {
 		is FunctionCall -> addFunctionCall(expression)
 		is VariableCall -> addVariableCall(expression)
 		else -> TODO()
 	}
 
-	fun addFunctionCall(functionCall: FunctionCall, varName: String? = null): Variable {
+	fun addFunctionCall(functionCall: FunctionCall, varName: String? = null): NamedIRElement {
 		val args = functionCall.arguments.children.map { addExpression(it) }
 		val varName = varName ?: generateTemp()
-		return function.addFunctionCall(function.module.function(functionCall.functionDefinition), args, varName)
+		return function.addFunctionCall(TODO()/*function.module.function(functionCall.functionDefinition)*/, args, varName)
 	}
 
-	fun addVariableCall(variableCall: VariableCall, varName: String? = null): Variable {
+	fun addVariableCall(variableCall: VariableCall, varName: String? = null): NamedIRElement {
 		if (variableCall.parent == null) {
 			val varName = varName ?: generateTemp()
 			return function.addVariable(variable(variableCall.variableDefinition.name),varName)
@@ -73,7 +73,7 @@ class FunctionGeneration(val function: Function) {
 		TODO()
 	}
 
-	fun variable(name: String): Variable {
+	fun variable(name: String): NamedIRElement {
 		TODO()
 	}
 

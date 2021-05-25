@@ -14,7 +14,7 @@ object CodeGeneration {
 	}
 
 	fun generateModule(name: String, definitionScope: DefinitionScope): Module {
-		val module = Module.new(name)
+		val module = Module.new()
 		definitionScope.children.forEach { module.generateDefinition(it) }
 		return module
 	}
@@ -30,7 +30,7 @@ object CodeGeneration {
 	}
 
 	fun Module.type(returnType: ReturnType): Type {
-		return typeByName(returnType.typeDefinition.name)
+		return TODO()
 	}
 
 }

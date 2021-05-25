@@ -1,12 +1,12 @@
 package dev.einsjannis.compiler.llvm
 
 import com.sun.jna.NativeLibrary
-import org.sosy_lab.llvm_j.binding.LLVMLibrary
 import java.io.File
 
-class Module private constructor(private val ref: LLVMLibrary.LLVMModuleRef) {
-
-	internal val contextRef get() = LLVMLibrary.LLVMGetModuleContext(ref)
+class Module private constructor(
+	val function: MutableList<Function> = mutableListOf(),
+	val struct: MutableList<Type.StructType> = mutableListOf()
+) {
 
 	companion object {
 
@@ -16,23 +16,12 @@ class Module private constructor(private val ref: LLVMLibrary.LLVMModuleRef) {
 			println(path)
 		}
 
-		fun new(name: String) : Module = Module(LLVMLibrary.LLVMModuleCreateWithName(name))
+		fun new() : Module = Module()
 
 	}
 
-	fun addFunction(name: String, returnType: Type): Function {
-		val function = LLVMLibrary.LLVMAddFunction(ref, name, returnType.ref)
+	fun addFunction(name: String, returnType: Type): Function = Function(name, returnType).also { function.add(it) }
 
-		return Function(function)
-	}
-
-	fun addStruct(name: String): Type {
-		val type = LLVMLibrary.LLVMStructCreateNamed(contextRef, name)
-
-		return Type(type)
-	}
-
-	fun typeByName(name: String): Type = Type(LLVMLibrary.LLVMGetTypeByName(ref, name))
-
+	fun addStruct(name: String): Type.StructType = Type.StructType(name).also { struct.add(it) }
 
 }

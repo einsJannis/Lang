@@ -1,29 +1,48 @@
 package dev.einsjannis.compiler.llvm
 
-import org.sosy_lab.llvm_j.binding.LLVMLibrary
+class Function internal constructor(
+	override val name: String,
+	val returnType: Type,
+	private val arguments: MutableList<Argument> = mutableListOf(),
+	private val code: MutableList<Code> = mutableListOf()
+) : GlobalIRElement {
 
-class Function internal constructor(private val ref: LLVMLibrary.LLVMValueRef) {
+	data class Argument(
+		override val name: String,
+		val type: Type
+	) : LocalIRElement {
 
-	val module: Module get() = TODO()
+		override fun generateIR(): String = "$type ${generateNameIR()}"
 
-	fun addArgument(name: String, type: Type) {
+	}
+
+	fun addArgument(name: String, type: Type): NamedIRElement {
+		val argument = Argument(name, type)
+		arguments.add(argument)
+		return argument
+	}
+
+	fun addFunctionCall(function: Function, arguments: List<NamedIRElement>, returnName: String): NamedIRElement {
 		TODO()
 	}
 
-	fun addFunctionCall(function: Function, arguments: List<Variable>, returnName: String): Variable {
+	fun addStructVariableCall(variable: NamedIRElement, fieldName: String, returnName: String): NamedIRElement {
 		TODO()
 	}
 
-	fun addStructVariableCall(variable: Variable, fieldName: String, returnName: String): Variable {
+	fun addVariable(old: NamedIRElement, newName: String): NamedIRElement {
 		TODO()
 	}
 
-	fun addVariable(old: Variable, newName: String): Variable {
-		TODO()
+	fun addReturnStatement(returnVar: NamedIRElement) {
+		code.add(Code.Return(returnVar))
 	}
 
-	fun addReturnStatement(returnVar: Variable) {
-		TODO()
-	}
+	override fun generateIR(): String =
+"""
+define ${returnType.generateNameIR()} ${generateNameIR()}(${arguments.joinToString { it.generateIR() }}) {
+${code.joinToString { "    " + it.generateIR() }}
+}
+"""
 
 }
