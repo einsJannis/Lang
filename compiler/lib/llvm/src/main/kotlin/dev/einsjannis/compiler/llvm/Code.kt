@@ -3,7 +3,7 @@ package dev.einsjannis.compiler.llvm
 interface Code : IRElement {
 
 	class Return(
-		val value: NamedIRElement
+		val value: Variable
 	) : Code {
 
 		override fun generateIR(): String = "ret $value"
@@ -12,9 +12,12 @@ interface Code : IRElement {
 
 	class FunctionCall(
 		val function: Function,
-		val arguments: List<NamedIRElement>,
+		val arguments: List<Variable>,
 		override val name: String
-	) : Code, LocalIRElement {
+	) : Code, IRElement.Named.Local {
+
+		override val type: Type
+			get() = function.returnType
 
 		override fun generateIR(): String =
 			"${generateNameIR()} = call ${function.returnType.generateNameIR()} ${function.generateNameIR()}(${arguments.joinToString { it.generateNameIR() }})"
@@ -22,32 +25,34 @@ interface Code : IRElement {
 	}
 
 	class AllocCall(
-		val type: Type,
+		override val type: Type,
 		override val name: String
-	) : Code, LocalIRElement {
+	) : Code, IRElement.Named.Local {
 
 		override fun generateIR(): String = "${generateNameIR()} = alloca ${type.generateNameIR()}"
 
 	}
 
 	class StructVariableCall(
-		val struct: Type.StructType,
+		override val type: Type.StructType,
 		val fieldName: String,
-		val variable: NamedIRElement,
+		val variable: Variable,
 		override val name: String,
-	) : Code, LocalIRElement {
+	) : Code, IRElement.Named.Local {
 
 		override fun generateIR(): String {
-			val inner = struct.getChildByName(fieldName) ?: throw Exception("NoSuchField: $fieldName in ${struct.name}")
-			return "${generateNameIR()} = getelementptr ${struct.generateNameIR()}, ${struct.ptr().generateNameIR()} ${variable.generateNameIR()}, ${inner.second} ${inner.first}"
+			val inner = type.getChildByName(fieldName) ?: throw Exception("NoSuchField: $fieldName in ${type.name}")
+			return "${generateNameIR()} = getelementptr ${type.generateNameIR()}, ${type.ptr().generateNameIR()} ${variable.generateNameIR()}, ${inner.second} ${inner.first}"
 		}
 
 	}
 
 	class VarAlias(
-		val variable: NamedIRElement,
+		val variable: Variable,
 		override val name: String
-	) : Code, LocalIRElement {
+	) : Code, IRElement.Named.Local {
+
+		override val type: Type get() = variable.type
 
 		override fun generateIR(): String = "${generateNameIR()} = ${variable.generateNameIR()}"
 

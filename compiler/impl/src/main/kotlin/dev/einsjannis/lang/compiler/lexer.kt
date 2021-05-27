@@ -21,6 +21,8 @@ object Token {
             val ParenthesesR by token(Regex.fromLiteral("}"))
             val BracesL by token(Regex.fromLiteral("("))
             val BracesR by token(Regex.fromLiteral(")"))
+			val AngledL by token(Regex.fromLiteral("<"))
+			val AngledR by token(Regex.fromLiteral(">"))
         }
         /*object Operator {
             val Plus by token(Regex.fromLiteral("+"))

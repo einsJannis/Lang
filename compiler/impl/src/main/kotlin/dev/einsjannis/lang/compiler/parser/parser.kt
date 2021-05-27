@@ -33,7 +33,7 @@ object Patterns {
     object Cast : Pattern<IRCast> by sequence4(
         tupleOf(Token.Symbol.Brackets.BracesL.pattern, sequence2(
             tupleOf(Token.Identifier.pattern, optional(Token.Symbol.Star.pattern)),
-            { (identifier, star) -> ReturnTypeImpl(identifier, star != null) }
+            { (identifier) -> ReturnTypeImpl(identifier) }
         ), Token.Symbol.Brackets.BracesR.pattern, Expression),
         { (_, returnType, _, expression) -> CastImpl(returnType, expression) }
     )
@@ -145,7 +145,7 @@ object Patterns {
 
     object ReturnType : Pattern<IRReturnType> by sequence3(
         tupleOf(Token.Symbol.ReturnType.pattern, Token.Identifier.pattern, optional(Token.Symbol.Star.pattern)),
-        { (_, identifier, star) -> ReturnTypeImpl(identifier, star != null) }
+        { (_, identifier, star) -> ReturnTypeImpl(identifier) }
     )
 
     object StructVariableDefinitionScope : Pattern<IRStructVariableDefinitionScope> by scopePattern(

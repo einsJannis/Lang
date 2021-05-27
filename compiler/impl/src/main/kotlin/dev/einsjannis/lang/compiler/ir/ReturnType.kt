@@ -4,6 +4,4 @@ interface ReturnType {
 
     val typeDefinition: TypeDefinition
 
-    val isPointer: kotlin.Boolean
-
 }

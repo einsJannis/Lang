@@ -4,7 +4,7 @@ import dev.einsjannis.compiler.lexer.Token
 import dev.einsjannis.lang.compiler.ir.ReturnType
 import dev.einsjannis.lang.compiler.ir.TypeDefinition
 
-class ReturnTypeImpl internal constructor(identifierToken: Token, override val isPointer: Boolean) : ReturnType {
+class ReturnTypeImpl internal constructor(identifierToken: Token) : ReturnType {
 
     val name = identifierValueOf(identifierToken)
 

@@ -1,8 +1,10 @@
 package dev.einsjannis.compiler.llvm
 
-sealed interface Type : GlobalIRElement {
+sealed interface Type : IRElement.Named.Global {
 
 	interface BuiltIn : Type {
+
+		override val type: Type get() = throw UnsupportedOperationException()
 
 		override fun generateNameIR(): String = name
 
@@ -16,39 +18,9 @@ sealed interface Type : GlobalIRElement {
 
 		interface Number : BuiltIn {
 
-			object I1 : Number {
+			class Integer(val n: Int) : Number {
 
-				override val name: String get() = "i1"
-
-			}
-
-			object I8 : Number {
-
-				override val name: String get() = "i8"
-
-			}
-
-			object I16 : Number {
-
-				override val name: String get() = "i16"
-
-			}
-
-			object I32 : Number {
-
-				override val name: String get() = "i32"
-
-			}
-
-			object I64 : Number {
-
-				override val name: String get() = "i64"
-
-			}
-
-			object I128 : Number {
-
-				override val name: String get() = "i128"
+				override val name: String get() = "i$n"
 
 			}
 
@@ -62,12 +34,23 @@ sealed interface Type : GlobalIRElement {
 
 		}
 
+		class FunctionType(
+			private val function: Function
+		) : BuiltIn {
+
+			override val name: String get() = "${function.returnType.generateNameIR()} (${function.arguments.joinToString { it.type.generateNameIR() }})"
+
+		}
+
 	}
 
 	class StructType(
 		override val name: String,
 		private val childTypes: MutableList<Pair<String, Type>> = mutableListOf()
 	) : Type {
+
+		override val type: Type
+			get() = TODO("Not yet implemented")
 
 		fun addChild(name: String, type: Type) {
 			childTypes += Pair(name, type)
