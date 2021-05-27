@@ -22,17 +22,11 @@ class Function internal constructor(
 		return argument
 	}
 
-	fun addFunctionCall(function: Function, arguments: List<NamedIRElement>, returnName: String): NamedIRElement {
-		TODO()
-	}
+	fun addFunctionCall(function: Function, arguments: List<NamedIRElement>, returnName: String): NamedIRElement =
+		Code.FunctionCall(function, arguments, returnName).also { code.add(it) }
 
-	fun addStructVariableCall(variable: NamedIRElement, fieldName: String, returnName: String): NamedIRElement {
-		TODO()
-	}
-
-	fun addVariable(old: NamedIRElement, newName: String): NamedIRElement {
-		TODO()
-	}
+	fun addStructVariableCall(struct: Type.StructType, variable: NamedIRElement, fieldName: String, returnName: String): NamedIRElement =
+		Code.StructVariableCall(struct, fieldName, variable, returnName)
 
 	fun addReturnStatement(returnVar: NamedIRElement) {
 		code.add(Code.Return(returnVar))
@@ -44,5 +38,9 @@ define ${returnType.generateNameIR()} ${generateNameIR()}(${arguments.joinToStri
 ${code.joinToString { "    " + it.generateIR() }}
 }
 """
+
+	fun addVarAlias(variable: NamedIRElement, varName: String): NamedIRElement {
+		TODO("Not yet implemented")
+	}
 
 }

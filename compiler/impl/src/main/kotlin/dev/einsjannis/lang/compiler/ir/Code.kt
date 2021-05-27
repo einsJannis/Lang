@@ -1,3 +1,3 @@
 package dev.einsjannis.lang.compiler.ir
 
-interface Code : Node
+sealed interface Code : Node

@@ -4,6 +4,7 @@ import dev.einsjannis.compiler.llvm.Module
 import dev.einsjannis.compiler.llvm.Type
 import dev.einsjannis.lang.compiler.generator.FunctionGeneration.Companion.generateFunction
 import dev.einsjannis.lang.compiler.ir.*
+import dev.einsjannis.lang.compiler.ir.builtin.Types
 
 object CodeGeneration {
 
@@ -29,8 +30,14 @@ object CodeGeneration {
 		addStruct(structDefinition.name)
 	}
 
-	fun Module.type(returnType: ReturnType): Type {
-		return TODO()
+	fun Module.type(returnType: ReturnType): Type = when(returnType.typeDefinition) {
+		Types.Unit -> Type.BuiltIn.VoidType
+		Types.Byte -> Type.BuiltIn.Number.I8
+		Types.Integer -> Type.BuiltIn.Number.I32
+		Types.Long -> Type.BuiltIn.Number.I64
+		Types.TypeMeta -> TODO()
+		else -> getStructByName(returnType.typeDefinition.name)
+			?: throw Exception("unknown type: ${returnType.typeDefinition.name}")
 	}
 
 }

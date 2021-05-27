@@ -10,12 +10,6 @@ class Module private constructor(
 
 	companion object {
 
-		init {
-			val path = File("lib").absolutePath
-			NativeLibrary.addSearchPath("LLVM-6.0", path)
-			println(path)
-		}
-
 		fun new() : Module = Module()
 
 	}
@@ -23,5 +17,9 @@ class Module private constructor(
 	fun addFunction(name: String, returnType: Type): Function = Function(name, returnType).also { function.add(it) }
 
 	fun addStruct(name: String): Type.StructType = Type.StructType(name).also { struct.add(it) }
+
+	fun getStructByName(name: String): Type.StructType? = struct.find { it.name == name }
+
+	fun getFunctionByName(name: String): Function? = function.find { it.name == name }
 
 }
