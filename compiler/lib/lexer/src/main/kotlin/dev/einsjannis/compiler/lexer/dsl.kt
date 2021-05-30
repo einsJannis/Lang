@@ -41,6 +41,8 @@ fun ignored(name: String, regex: Regex): TokenType = tokenListBuilder.ignored(na
 
 fun token(regex: Regex): TokenTypeDelegate = TokenTypeDelegate(regex, ::token)
 
+fun token(literal: String): TokenTypeDelegate = token(Regex.fromLiteral(literal))
+
 fun ignored(regex: Regex): TokenTypeDelegate = TokenTypeDelegate(regex, ::ignored)
 
 class TokenTypeDelegate(private val regex: Regex, val createToken: (name: String, regex: Regex) -> TokenType) :

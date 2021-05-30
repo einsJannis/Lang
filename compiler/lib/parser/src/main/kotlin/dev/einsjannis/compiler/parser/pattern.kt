@@ -61,6 +61,8 @@ fun <T> lazyPatternMap(lazyPattern: () -> Pattern<T>) = LazyPattern(lazyPattern)
 
 fun <T> optional(pattern: Pattern<T>) = OptionalPattern(pattern)
 
+fun <T> superPattern(vararg patterns: Pattern<T>) = superPattern(listOf(*patterns))
+
 fun <T> superPattern(patterns: List<Pattern<T>>) = object : Pattern<T> {
 
     override fun match(tokens: AdvancedIterator<Token>): Match<T> {
@@ -77,6 +79,13 @@ fun <T> superPattern(patterns: List<Pattern<T>>) = object : Pattern<T> {
     }
 
 }
+
+fun <E : Any, S : Any, LS : Any, LE : Any> scopePattern(
+	elementPattern: Pattern<E>,
+	separatorPattern: Pattern<S>,
+	limiterPatterns: Tuple2<Pattern<*>, Pattern<LS>, Pattern<LE>>,
+	requireTrailing: Boolean = false
+) = scopePattern(elementPattern, separatorPattern, limiterPatterns, { it }, requireTrailing)
 
 fun <E : Any, S : Any, LS, LE, T> scopePattern(
 	elementPattern: Pattern<E>,

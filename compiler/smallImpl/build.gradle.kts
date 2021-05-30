@@ -12,6 +12,7 @@ dependencies {
 	implementation(project(":parserLib"))
 	implementation(project(":llvm"))
 }
+
 tasks {
 
 	withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
