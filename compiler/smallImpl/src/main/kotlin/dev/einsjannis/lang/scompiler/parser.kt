@@ -115,7 +115,7 @@ object Pattern {
 		tupleOf(Token.Symbol.BracesL.pattern, Token.Symbol.BracesR.pattern)
 	)
 
-	object Statement : Pattern<IRStatement> by superPattern(Expression, Assignment, Conditional)
+	object Statement : Pattern<IRStatement> by superPattern(Expression, Assignment, Conditional, VariableDef)
 
 	object Expression : Pattern<IRExpression> by superPattern(FunctionCall, VariableCall, Primitive)
 
@@ -246,12 +246,31 @@ object Pattern {
 		)
 	))
 
+	object VariableDef : Pattern<IRVariableDef> by sequence4(
+		tupleOf(Token.Keyword.Variable.pattern, Token.Identifier.pattern, ReturnType, optional(sequence2(
+			tupleOf(Token.Symbol.EqualSign.pattern, Expression),
+			{ (_, initializer) -> initializer }
+		))),
+		{ (_, name, returnType, initializer) ->
+			if (initializer != null)
+				VariableImplImpl(name.content, returnType, initializer)
+			else
+				VariableDefImpl(name.content, returnType)
+		}
+	)
+
 }
 
-internal data class VariableDefImpl(
+internal open class VariableDefImpl(
 	override val name: String,
 	override val type: IRReturnType
 ) : IRVariableDef
+
+internal class VariableImplImpl(
+	name: String,
+	type: IRReturnType,
+	override val initializer: IRExpression
+) : VariableDefImpl(name, type), VariableImpl
 
 data class ReturnTypeImpl(val name: kotlin.String, override val templateArguments: List<IRTemplateArgument>) : IRReturnType {
 
@@ -271,9 +290,7 @@ data class FunctionCallImpl(
 
 	override val funDef: FunctionDef get() = _funDef ?: throw Exception("Not initialized yet")
 
-	internal var _returnType: IRReturnType? = null
-
-	override val returnType: IRReturnType get() = _returnType ?: throw Exception("Not initialized yet")
+	override val returnType: IRReturnType get() = funDef.returnType
 
 }
 

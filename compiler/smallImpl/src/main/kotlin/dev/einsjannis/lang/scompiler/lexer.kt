@@ -15,6 +15,8 @@ object Token {
 
 		val Function by token("fun")
 
+		val Variable by token("var")
+
 		val Constant by token("const")
 
 		val If by token("if")

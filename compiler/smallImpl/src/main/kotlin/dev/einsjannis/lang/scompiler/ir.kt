@@ -12,7 +12,7 @@ sealed interface FunctionDef : Definition {
 	val argumentDefs: List<VariableDef>
 }
 
-interface VariableDef {
+interface VariableDef : Statement {
 	val name: kotlin.String
 	val type: ReturnType
 }
