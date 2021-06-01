@@ -123,9 +123,9 @@ fun analyseStatement(
 	variableDefs: MutableList<VariableDef>
 ) = when (statement) {
 	is Expression -> analyseExpression(statement, types, functions, templateTypes, templateConsts, variableDefs)
-	is VariableDef -> TODO()
-	is Assignment -> TODO()
-	is Conditional -> TODO()
+	is VariableDef -> analyseVariableDefOrImpl(statement, types, functions, templateTypes, templateConsts, variableDefs)
+	is Assignment -> analyseAssignment(statement, types, functions, templateTypes, templateConsts, variableDefs)
+	is Conditional -> analyseConditional(statement, types, functions, templateTypes, templateConsts, variableDefs)
 }
 
 fun analyseExpression(
@@ -138,6 +138,8 @@ fun analyseExpression(
 ) {
 	when (expression) {
 		is FunctionCall -> analyseFunctionCall(expression, types, functions, templateTypes, templateConsts, variableDefs)
+		is VariableCall -> analyseVariableCall(expression, variableDefs)
+		is Primitive -> return
 	}
 	analyseReturnType(expression.returnType, types, templateTypes)
 }
@@ -155,9 +157,10 @@ fun analyseFunctionCall(
 	functionCall._funDef = functions.find {
 		it.name == functionCall.name &&
 			it.argumentDefs.filterIndexed { index, variableDef ->
-				functionCall.arguments[index].returnType.typeDef.name != variableDef.type.typeDef.name
+				functionCall.arguments[index].returnType != variableDef.type
 			}.isNotEmpty()
 	}
+	TODO()
 }
 
 fun analyseArguments(
@@ -168,3 +171,55 @@ fun analyseArguments(
 	templateConsts: MutableList<VariableDef>,
 	variableDefs: MutableList<VariableDef>
 ) = arguments.forEach { analyseExpression(it, types, functions, templateTypes, templateConsts, variableDefs) }
+
+fun analyseVariableCall(variableCall: VariableCall, variableDefs: MutableList<VariableDef>) {
+	if (variableCall !is VariableCallImpl) throw Exception("huh?")
+	if (variableCall.parent != null) {
+		analyseVariableCall(variableCall, variableDefs)
+		TODO()
+	} else {
+		variableDefs.find { it.name == variableCall.name }
+	}
+}
+
+fun analyseVariableDefOrImpl(
+	variableDef: VariableDef,
+	types: MutableList<TypeDef>,
+	functions: MutableList<FunctionDef>,
+	templateTypes: MutableList<String>,
+	templateConsts: MutableList<VariableDef>,
+	variableDefs: MutableList<VariableDef>
+) {
+	analyseVariableDef(variableDef, types, templateTypes, variableDefs)
+	if (variableDef is VariableImpl) {
+		analyseExpression(variableDef.initializer, types, functions, templateTypes, templateConsts, variableDefs)
+		if (variableDef.type != variableDef.initializer.returnType) throw Exception("wrong type")
+	}
+}
+
+fun analyseAssignment(
+	assignment: Assignment,
+	types: MutableList<TypeDef>,
+	functions: MutableList<FunctionDef>,
+	templateTypes: MutableList<String>,
+	templateConsts: MutableList<VariableDef>,
+	variableDefs: MutableList<VariableDef>
+) {
+	analyseVariableCall(assignment.varCall, variableDefs)
+	analyseExpression(assignment.initializer, types, functions, templateTypes, templateConsts, variableDefs)
+	if (assignment.varCall.returnType != assignment.initializer.returnType) throw Exception("wrong type")
+}
+
+fun analyseConditional(
+	conditional: Conditional,
+	types: MutableList<TypeDef>,
+	functions: MutableList<FunctionDef>,
+	templateTypes: MutableList<String>,
+	templateConsts: MutableList<VariableDef>,
+	variableDefs: MutableList<VariableDef>
+) {
+	analyseExpression(conditional.condition, types, functions, templateTypes, templateConsts, variableDefs)
+	if (conditional.condition.returnType.typeDef != Type.Boolean) throw Exception("wrong type (searched for boolean)")
+	analyseCode(conditional.code, types, functions, templateTypes, templateConsts, variableDefs)
+	conditional.other?.let { analyseConditional(it, types, functions, templateTypes, templateConsts, variableDefs) }
+}
