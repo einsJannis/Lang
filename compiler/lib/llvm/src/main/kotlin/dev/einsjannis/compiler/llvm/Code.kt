@@ -58,4 +58,15 @@ interface Code : IRElement {
 
 	}
 
+	class Primitive(
+		val primitiveValue: PrimitiveValue,
+		override val name: String
+	) : Code, IRElement.Named.Local {
+
+		override val type: Type = primitiveValue.type
+
+		override fun generateIR(): String = "${generateNameIR()} = ${primitiveValue.asString()}"
+
+	}
+
 }

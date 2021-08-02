@@ -37,11 +37,16 @@ class Function internal constructor(
 	fun addVarAlias(variable: Variable, varName: String): Variable =
 		Code.VarAlias(variable, varName).also { code.add(it) }
 
+	fun addPrimitive(primitiveValue: PrimitiveValue, varName: String): Variable =
+		Code.Primitive(primitiveValue, varName)
+
+	fun addAllocationCall(type: Type, varName: String): Variable =
+		Code.AllocCall(type, varName)
 
 	override fun generateIR(): String =
 """
 define ${returnType.generateNameIR()} ${generateNameIR()}(${arguments.joinToString { it.generateIR() }}) {
-${code.joinToString { "    " + it.generateIR() }}
+${code.joinToString("\n") { "    " + it.generateIR() }}
 }
 """
 

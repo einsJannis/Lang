@@ -1,12 +1,9 @@
 package dev.einsjannis.compiler.llvm
 
-import com.sun.jna.NativeLibrary
-import java.io.File
-
 class Module private constructor(
 	val function: MutableList<Function> = mutableListOf(),
 	val struct: MutableList<Type.StructType> = mutableListOf()
-) {
+) : IRElement {
 
 	companion object {
 
@@ -21,5 +18,7 @@ class Module private constructor(
 	fun getStructByName(name: String): Type.StructType? = struct.find { it.name == name }
 
 	fun getFunctionByName(name: String): Function? = function.find { it.name == name }
+
+	override fun generateIR(): String = TODO()
 
 }
