@@ -1,10 +1,9 @@
 package dev.einsjannis.compiler.llvm
 
-class Function internal constructor(
+sealed class Function constructor(
 	override val name: String,
 	val returnType: Type,
 	val arguments: MutableList<Argument> = mutableListOf(),
-	val code: MutableList<Code> = mutableListOf()
 ) : IRElement.Named.Global {
 
 	data class Argument(
@@ -16,6 +15,49 @@ class Function internal constructor(
 
 	}
 
+	class FunctionImplementation internal constructor(
+		name: String,
+		returnType: Type,
+		arguments: MutableList<Argument> = mutableListOf(),
+		val code: MutableList<Code> = mutableListOf()
+	) : Function(name, returnType, arguments) {
+
+		fun addFunctionCall(function: Function, arguments: List<Variable>, returnName: String): Variable =
+			Code.FunctionCall(function, arguments, returnName).also { code.add(it) }
+
+		fun addReturnStatement(returnVar: Variable) {
+			Code.Return(returnVar).also { code.add(it) }
+		}
+
+		fun addVarAlias(variable: Variable, varName: String): Variable =
+			Code.VarAlias(variable, varName).also { code.add(it) }
+
+		override fun generateIR(): String = """
+		define ${returnType.generateNameIR()} ${generateNameIR()}(${arguments.joinToString { it.generateIR() }}) {
+		${code.joinToString { "    " + it.generateIR() }}
+		}
+		""".trimIndent()
+
+		fun addPrimitive(primitiveValue: PrimitiveValue, varName: String): Variable =
+			Code.Primitive(primitiveValue, varName)
+
+		fun addAllocationCall(type: Type, varName: String): Variable =
+			Code.AllocCall(type, varName)
+
+	}
+
+	class FunctionDeclaration internal constructor(
+		name: String,
+		returnType: Type,
+		arguments: MutableList<Argument> = mutableListOf(),
+	) : Function(name, returnType, arguments) {
+
+		override fun generateIR(): String = """
+		declare ${returnType.generateNameIR()} ${generateNameIR()}(${arguments.joinToString { it.generateIR() }})
+		""".trimIndent()
+
+	}
+
 	override val type: Type get() = Type.BuiltIn.FunctionType(this)
 
 	fun addArgument(name: String, type: Type): Variable {
@@ -23,31 +65,5 @@ class Function internal constructor(
 		arguments.add(argument)
 		return argument
 	}
-
-	fun addFunctionCall(function: Function, arguments: List<Variable>, returnName: String): Variable =
-		Code.FunctionCall(function, arguments, returnName).also { code.add(it) }
-
-	fun addStructVariableCall(struct: Type.StructType, variable: Variable, fieldName: String, returnName: String): Variable =
-		Code.StructVariableCall(struct, fieldName, variable, returnName).also { code.add(it) }
-
-	fun addReturnStatement(returnVar: Variable) {
-		Code.Return(returnVar).also { code.add(it) }
-	}
-
-	fun addVarAlias(variable: Variable, varName: String): Variable =
-		Code.VarAlias(variable, varName).also { code.add(it) }
-
-	fun addPrimitive(primitiveValue: PrimitiveValue, varName: String): Variable =
-		Code.Primitive(primitiveValue, varName)
-
-	fun addAllocationCall(type: Type, varName: String): Variable =
-		Code.AllocCall(type, varName)
-
-	override fun generateIR(): String =
-"""
-define ${returnType.generateNameIR()} ${generateNameIR()}(${arguments.joinToString { it.generateIR() }}) {
-${code.joinToString("\n") { "    " + it.generateIR() }}
-}
-"""
 
 }

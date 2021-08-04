@@ -11,7 +11,7 @@ interface Code : IRElement {
 	}
 
 	class FunctionCall(
-		val function: Function,
+		val function: LocalFunction,
 		val arguments: List<Variable>,
 		override val name: String
 	) : Code, IRElement.Named.Local {

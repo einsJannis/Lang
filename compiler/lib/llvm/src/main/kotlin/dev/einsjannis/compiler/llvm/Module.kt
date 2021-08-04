@@ -1,8 +1,7 @@
 package dev.einsjannis.compiler.llvm
 
 class Module private constructor(
-	val function: MutableList<Function> = mutableListOf(),
-	val struct: MutableList<Type.StructType> = mutableListOf()
+	val function: MutableList<Function> = mutableListOf()
 ) : IRElement {
 
 	companion object {
@@ -11,14 +10,16 @@ class Module private constructor(
 
 	}
 
-	fun addFunction(name: String, returnType: Type): Function = Function(name, returnType).also { function.add(it) }
+	fun addFunctionDeclaration(name: String, returnType: Type): Function.FunctionDeclaration = Function.FunctionDeclaration(name, returnType).also { function.add(it) }
 
-	fun addStruct(name: String): Type.StructType = Type.StructType(name).also { struct.add(it) }
-
-	fun getStructByName(name: String): Type.StructType? = struct.find { it.name == name }
+	fun addFunction(name: String, returnType: Type): Function.FunctionImplementation = Function.FunctionImplementation(name, returnType).also { function.add(it) }
 
 	fun getFunctionByName(name: String): Function? = function.find { it.name == name }
 
-	override fun generateIR(): String = TODO()
+	override fun generateIR(): String {
+		val builder = StringBuilder()
+		function.forEach { builder.append(it.generateIR()) }
+		return builder.toString()
+	}
 
 }

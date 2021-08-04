@@ -35,7 +35,7 @@ sealed interface Type : IRElement.Named.Global {
 		}
 
 		class FunctionType(
-			private val function: Function
+			private val function: LocalFunction
 		) : BuiltIn {
 
 			override val name: String get() = "${function.returnType.generateNameIR()} (${function.arguments.joinToString { it.type.generateNameIR() }})"

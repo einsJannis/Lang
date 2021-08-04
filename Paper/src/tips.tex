@@ -1,0 +1,155 @@
+% !TEX encoding = UTF-8 Unicode
+% !TEX root = MA.tex
+
+\section*{Tips}
+\subsection*{Cheat Sheet}
+Viele gute Tips sind im \href{run:../Dokumentationen/cheat-sheet.pdf}{\ttfamily cheat-sheet.pdf} zu finden.
+
+\subsection*{Anführungs- und Schlusszeichen, Texthervorhebungen}
+Mehrfache Leerschläge            im Quelltext haben keine Auswirkungen.
+
+Abschnitte werden durch eine leere Linie erzeugt.
+
+Anführungs- und Schlusszeichen werden im Volksmund auch \enquote{Gänsefüsschen} genannt. 
+
+Ein  \textbf{fett gesetzter Teil} behindert den Lesefluss. Deswegen ist ein \emph{kursiv gesetzter Text} zu bevorzugen.
+
+Eigennamen (zum Beispiel für den Satz von \textsc{Pythagoras}), werden häufig in \textsc{Kapitälchen} gesetzt.
+\subsection*{Einfache Textbausteine}
+
+\def\FCL{Fussballclub Luzern}
+Der Befehl \begin{verbatim*}\def\FCL{Fussballclub Luzern}\end{verbatim*} 
+definiert die Abkürzung \begin{verbatim*}\FCL\end{verbatim*} 
+als \enquote{\FCL}.
+
+\subsection*{Tabellen}
+Tabellen haben eine grosse Anfangshürde. Die Webseite \url{http://www.tablesgenerator.com} ist sehr nützlich. Tabellen können in Excel erstellt werden und dann auf der Website in \LaTeX -Quellcode umgewandelt werden.
+
+Hier ist eine Tabelle mit Dezimaltabulator:
+\begin{table}[htp]
+\caption{Messwerte}
+\label{tab:messwerte1}
+\begin{center}
+\begin{tabular}{|d{0}|d{1}|}
+\hline
+\text{Zeit in (s)} & \text{Temperatur in \SI{}{\celsius}} \\
+\hline\hline
+0 & 10.5 \\
+30 & 15.7 \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\subsection*{Bilder}
+Das Logo unsrer Schule ist in Abbildung~\vref{fig:ksa} zu finden.
+\begin{figure}[htb]
+	\centering
+		\includegraphics{\BILDER ksalpenquai} \\
+		\vspace{1ex}
+		\includegraphics[width=0.3\textwidth]{\BILDER ksalpenquai}
+ 	\caption[Logo unserer Schule]{Logo unserer Schule, in Originalgrösse und auf 0.3-fache Textweite gesetzt.\footnotemark}
+  \label{fig:ksa}
+\end{figure}
+	\footnotetext{Beispiel für eine Fussnote in einer Bildbeschreibung.}
+
+\textbf{Wichtiger Hinweis}: der Dateiname eines Bildes darf keine Umlaute enthalten.
+
+\subsection*{Aus Mathematik und Physik}
+
+Wenn ein Mensch mit \SI{1}{\meter\per\second} unterwegs ist, so beträgt seine Geschwindigkeit \SI{3600}{\meter\per\hour}. 
+Das ist gleichviel wie \SI{3.6}{\kilo\meter\per\hour} oder \SI{1e9}{\nano\meter\per\second}.
+
+Eine Schokolade kostet \FR{3.20}
+
+Die Formel $F =  m \cdot  g$ ist den Leuten im Maturajahr mit einer Wahrscheinlichkeit von \SI{73.1}{\percent} bekannt. 
+
+Zahlen können so dargestellt werden: \num{0.1234567}. Multipliziert mit \num{1e6} ergibt das \num{123456.7}.
+
+Eine Gleichung ohne Nummer sieht so aus:
+\begin{equation*}
+c^2 =  a^2 + b^2
+\end{equation*}
+
+Eine Gleichung mit Kasten und Nummer sieht so aus:
+\begin{equation}
+\boxed{
+	c^2 =  a^2 + b^2
+}
+\end{equation}
+
+Eine andere Umgebung für mehrere Gleichungen untereinander ist hier dargestellt:
+\begin{align*}
+e &= \SI{1.60E-19}{\coulomb} &\text{Elementarladung} \\
+m_{e} &=  \SI{9.11E-31}{\kilo\gram} &\text{Ruhemasse des Elektrons}\\
+u &=  \SI{1.66e-27}{\kilo\gram} &\text{Atommassen-Einheit} \\
+G&= \SI{6.67259E-11}{\meter^3\per(\kilo\gram\second^2)} &\text{Gravitationskonstante} \\
+k& = \SI{8.988E9}{\newton\meter^2\per\coulomb^2}= \frac{1}{4 \pi \cdot \epsilon_0}  &\text{Elektrostatik} \\
+\epsilon_0&= \SI{8.854E-12}{\coulomb^2\per(\newton\meter^2)} &\text{elektrische Feldkonstante}
+\end{align*}
+
+Dasselbe, aber mit nur teilweise nummerierten Gleichungen:
+\begin{align}
+e &= \SI{1.60E-19}{\coulomb} &\text{Elementarladung} \\
+m_{e} &=  \SI{9.11E-31}{\kilo\gram} &\text{Ruhemasse des Elektrons}\notag\\
+u &=  \SI{1.66e-27}{\kilo\gram} &\text{Atommassen-Einheit} \\
+G&= \SI{6.67259E-11}{\meter^3\per(\kilo\gram\second^2)} &\text{Gravitationskonstante} \\
+k& = \SI{8.988E9}{\newton\meter^2\per\coulomb^2}= \frac{1}{4 \pi \cdot \epsilon_0}  &\text{Elektrostatik} \\
+\epsilon_0&= \SI{8.854E-12}{\coulomb^2\per(\newton\meter^2)} &\text{elektrische Feldkonstante}
+\end{align}
+
+Auch Vektoren können einfach dargestellt werden: 
+\begin{equation*}
+\vec{a} =  \frac{ \Delta \vec{v} }{ \Delta t} 
+\end{equation*}
+\subsection*{Geogebra}
+
+Bilder können exportiert werden als \LaTeX -Code.
+
+\begin{pspicture*}(-1.12,-0.72)(8.42,3.48)
+\psset{xunit=1.0cm,yunit=1.0cm,algebraic=true,dimen=middle,dotstyle=o,dotsize=3pt 0,linewidth=0.8pt,arrowsize=3pt 2,arrowinset=0.25}
+\multips(0,0)(0,1.0){5}{\psline[linestyle=dashed,linecap=1,dash=1.5pt 1.5pt,linewidth=0.4pt,linecolor=lightgray]{c-c}(-1.12,0)(8.42,0)}
+\multips(-1,0)(1.0,0){10}{\psline[linestyle=dashed,linecap=1,dash=1.5pt 1.5pt,linewidth=0.4pt,linecolor=lightgray]{c-c}(0,-0.72)(0,3.48)}
+\psaxes[labelFontSize=\scriptstyle,xAxis=true,yAxis=true,Dx=1.,Dy=1.,ticksize=-2pt 0,subticks=2]{->}(0,0)(-1.12,-0.72)(8.42,3.48)
+\rput[tl](4.66,2.9){$ \SI{1}{\meter\per\second} \hat= \SI{1}{\centi\meter}$}
+\end{pspicture*}
+
+\subsection*{Chemie}
+Das ist eine Reaktionsgleichung:
+\begin{equation}
+\ce{CO2 + C -> 2 CO} 
+\end{equation}
+Im Text können chemische Gleichungen wie \ce{A <--> B} ebenfalls verwendet werden\footnote{Hilfe zu Chemie findet sich im Helpfile mhchem.pdf des Pakets \enquote{mhchem}}.
+
+Etwas komplizierter:
+\begin{align*}
+  \ce{RNO2 &<=>[+e] RNO2^{-.} \\
+       RNO2^{-.} &<=>[+e] RNO2^2-}
+\end{align*}
+
+Falls Strukturformeln benötigt werden:\\
+\url{https://www.latex-kurs.de/kurse/2017/Kurs2/Teil10/Chemie.pdf}
+\begin{equation}
+\chemfig{H-C(-[2]H)(-[6]H)-H} \quad\quad \chemfig{*6(=-=-=-)} \quad\quad \chemfig{H-[:52.24]\lewis{1:3:,O}-[::-104.48]H}
+\end{equation}
+
+\subsection*{Quellen}
+
+Hier wird eine Webseite~\parencite{maKSA} zitiert. \cite{Theis2014} hat sein Buch geschrieben. Daraus ist speziell ein Fallbeispiel \cite[siehe][Seite 32]{Theis2014} interessant. Näheres ist in \url{https://en.wikibooks.org/wiki/LaTeX/Bibliographies_with_biblatex_and_biber} zu finden. \footnote{Eine Fussnote mit einer Quellenangabe \parencite[siehe][Seite 32]{Theis2014}.}
+
+Hier wird eine URL mit Umlaut zitiert:\cite{Gärtner}.
+
+\subsection*{Glossar, Akronyme}
+Hilfe: \url{https://en.wikibooks.org/wiki/LaTeX/Glossary}.
+
+An der \Acrlong{ksa}  ist die Abkürzung  \acrshort{ksa} geläufig.
+
+
+Der erste Gebrauch von \gls{idn} sieht anders aus als der zweite Gebrauch von \gls{idn}. 
+
+Der Gebrauch von \acrshort{idn} sieht anders aus als der  Gebrauch von \ACRshort{idn}. 
+
+Der erste Gebrauch von \gls{bla} sieht anders aus als der zweite Gebrauch von \gls{bla}. 
+
+Der erste Gebrauch von \gls{qgis} sieht nicht anders aus als der zweite Gebrauch von \gls{qgis}. 
+

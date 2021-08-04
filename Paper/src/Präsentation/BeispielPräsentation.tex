@@ -1,0 +1,280 @@
+% !TEX TS-program = XeLaTeX
+% !TEX encoding = UTF-8 Unicode
+\documentclass[11pt,german,aspectratio=169]{beamer}
+\usepackage{KSA} 
+
+%_________________________________________________________________________
+% Grundfarbe
+\def\myColor{blue!80!white!70!green}                % siehe usepackage color         
+\setbeamercolor{structure}{fg=\myColor!65!black}    % für Überschriften und bullets  wird noch mit 35% schwarz abgedunkelt
+
+% Befehle für Schriftarten
+\newcommand{\thisColor}[1]{{\color{\myColor}#1}}    % Argument wird in der Grundfarbe geschrieben
+\newcommand{\grey}[1]{{\color{black!60}#1}}         % Argument wird grau geschrieben
+\newcommand{\tttc}[1]{{\tt\thisColor{#1}}}          % Argument wird in der Grundfarbe und in typetext geschrieben
+\newcommand{\ttgr}[1]{{\tt\grey{#1}}}               % Argument wird grau und in typetext geschrieben
+
+% Befehle für URLs
+\newcommand{\smallurl}[1]{{\scriptsize{\url{#1}}}}
+\newcommand{\tinyurl}[1]{{\tiny{\url{#1}}}}
+
+
+% Schlüsselwörter für listings (hier für LaTeX eingestellt)
+\lstset{language=[LaTeX]TeX,frame=single,basicstyle=\tiny\ttfamily,keywordstyle=\color{blue}\bfseries, 
+backgroundcolor=\color{black!3}, stringstyle=\ttfamily, 
+morekeywords={subsection, subsubsection, maFRAGE, maAutorIn, maOrt, maKlasse, maTitel, maBetreuung, citep} 
+}
+
+%_________________________________________________________________________
+% WICHTIG: Pfad für die Bilder der Präsentation
+\def\BILDER{../Bilder/} % Achtung: kantonLU.png und ksalpenquai.png müssen in diesem Ordner sein!
+
+\title{ \LaTeX\ für Maturaarbeiten an der \\Kantonsschule Alpenquai\\
+	%\includegraphics[width=0.8\textwidth]{\BILDER Titelbild.png}
+}
+
+\author{Christoph von Arx}
+\date{12. \& 26. \,November 2020	}
+%_________________________________________________________________________
+\begin{document}
+\frame{\titlepage}   % Titelfolie
+
+\begin{frame}
+\frametitle{Inhalt}  % Inhalt
+\tableofcontents
+\end{frame}
+%_________________________________________________________________________
+
+\section{Einführung} % Die Gliederung bestimmt das Inhaltsverzeichnis
+\frame
+{
+	\frametitle{Was ist \LaTeX ?}
+	\LaTeX\ ist ein Textsatzsystem, das hohe typographische Ansprüche erfüllt.
+
+\begin{center}
+		\parbox[c]{0.98\textwidth}
+		{\begin{description}
+	\item[Eingabe]ist ein reines Text-Dokument in einem Text-Editor mit inhaltlichem Text und \LaTeX-Befehlen.
+	\item[Verarbeitung]erfolgt durch den Befehl \enquote{Setzen}.
+	\item[Ausgabe]ist ein formatiertes PDF-Dokument.
+\end{description}
+}
+\end{center}
+}
+
+\frame
+{
+	\frametitle{Verarbeitungsschema}
+	 	\begin{center}
+	 \includegraphics[width=0.95\textwidth]{\BILDER latexSchema_blau}
+	 	\end{center}
+		\vfill
+{\tiny (Quelle: \url{http://latex.tugraz.at/latex/tutorial})}
+}
+
+
+\frame
+{
+  \frametitle{Warum \LaTeX\ und nicht MS Word?}
+\begin{itemize}
+	\item professioneller Textsatz
+	\item klar und einheitlich strukturierte Dokumente
+	\item für mathematische Gleichungen überragend
+	\item standardisierte Verwendung von Quellen  \\$ \Rightarrow$ Zusammenarbeit mit Quellen-Datenbanken
+	\item sehr einfache Handhabung von Verweisen und Fussnoten
+	\item Inhalt und Form sind getrennt \\$ \Rightarrow$ Konzentration auf Inhalt, Vorlage definiert Form
+	\item an einigen Hochschulinstituten \emph{der} Standard
+	\item open source, lauffähig auf Windows, OS X, Linux
+	\item modular und erweiterbar: Bücher, Chemie, Musikpartituren, Schach, \dots
+\end{itemize}
+}
+
+\frame
+{
+	\frametitle{Hindernisse}
+\begin{itemize}
+	\item braucht Umgewöhnung
+	\item beachtliche Einstiegshürde
+\end{itemize}
+
+
+}
+
+\section{in vier Schritten zum Ziel}
+\frame
+{
+	\frametitle{Schritt 1: Installation von TeX Live}
+	
+	Homepage des Pakets Maturaarbeit KSA: \\
+	\vspace{2ex}
+	\url{https://gitlab.com/c.v.a/maturaarbeit-KSA} \\
+	\vspace{1ex}	
+	Link \ttgr{Readme} anklicken.\\
+	\vspace{2ex}
+	Readme enthält
+	
+	\begin{itemize}
+		\item Link zu \ttgr{FAQ Wiki} (im Aufbau begriffen)
+		\item Kurzanleitung für die Installation von \tttc{TeX Live}\ mit den benötigten Links
+		\item Link zum Herunterladen der eigentlichen Vorlage
+		\item Einstieg zum Schreiben
+	\end{itemize}
+	
+}
+\frame
+{
+	\frametitle{Schritt 1a: Einstellung Texteditoren}
+	\begin{itemize}
+		\item Encoding: unbedingt UTF-8 als Standard setzen.
+		\item Rechtschreibung: siehe Anleitung \href{run:Installation-Rechtschreibung.pdf}{\tttc{Installation-Rechtschreibung.pdf}}
+		\item Vervollständigung: siehe Anleitung \href{run:Vervollständigung.pdf}{\tttc {Vervollständigung.pdf}}\\
+		(der schwarze Punkt \textbullet\ wird durch Alt-Tab $[$OS X$]$ oder Ctrl-Tab $[$sonst$]$ erreicht.)
+	\end{itemize}
+}
+\frame
+{
+	\frametitle{Schritt 2: Installation der eigentlichen Vorlage}
+	
+	
+	Homepage der Vorlage: \\
+	\smallurl{https://gitlab.com/c.v.a/maturaarbeit-KSA/-/archive/master/maturaarbeit-KSA-master.zip}
+	
+			\begin{description}
+ 				\item[MA-Vorlage] {\tt{MA.tex}} mit \thisColor{\XeTeX}\ oder \thisColor{\XeLaTeX}\\ zum Laufen bringen
+			\end{description}
+	\begin{itemize}
+		\item Damit ist die Form schon erfüllt und die Note 6 dafür ist garantiert ;-)
+		\item Der Fokus ist jetzt zu \SI{100}{\percent} auf dem Inhalt.
+	\end{itemize}
+}
+
+\frame
+{
+	\frametitle{Schritt 3: Eigene Maturaarbeit beginnen (Inhaltsverzeichnis)}
+	
+		\begin{itemize}
+			\item Textbausteine setzen
+	\lstinputlisting{bsp1.tex}
+			
+			\item Kapitelüberschriften hinzufügen, weglassen, umbenennen \\
+	\lstinputlisting{bsp2.tex}
+			\item Unterkapitelüberschriften hinzufügen \\
+	\lstinputlisting{bsp3.tex}
+			\item Abschnittüberschriften hinzufügen \\
+	\lstinputlisting{bsp4.tex}
+		\end{itemize}
+	
+}
+\frame
+{
+	\frametitle{Schritt 4: Eigene Arbeit mit Inhalt füllen}
+	\begin{itemize}
+		\item Vergleichen mit Beispiel-Arbeit: schauen, wie etwas gemacht wird und nachahmen
+		\item bei Problemen in den Anleitungen nachschlagen
+		\item die Internetforen bieten oft gute Lösungen zu Problemen mit \LaTeX
+		\item bei Schwierigkeiten: ungeniert mail senden an \href{mailto:christoph.vonarx@edulu.ch}{\tt{christoph.vonarx@edulu.ch}}\\
+		{\color{green!80!white!70!black} möglichst früh!}
+		
+	\end{itemize}
+	
+}
+
+\section{arbeiten mit Quellen}
+\frame
+{
+	\frametitle{Quellen}
+	\begin{itemize}
+		\item \LaTeX\ arbeitet mit \thisColor{Biber}\ zusammen. Quellen sind standardisiert erfasst:
+	\lstinputlisting{bsp5.tex}
+	\item Erfassung geschieht mit Datenbankprogrammen:
+		\begin{description}
+			\item[JabRef] auf allen Plattformen \\
+			
+		\url{http://jabref.sourceforge.net}
+			\item[BibDesk] auf OS X	\\ \url{http://bibdesk.sourceforge.net}		
+		\end{description}
+	\end{itemize}
+	
+}
+\frame
+{
+	\frametitle{Beipiel eines Zitats}
+	\begin{itemize}
+		\item Quelltext \\
+			\lstinputlisting{bsp6.tex}
+		\item Dokument \\
+		 	\begin{center}
+		 \includegraphics[width=0.90\textwidth]{\BILDER zitat1}
+		 \end{center}
+		\item Literaturverzeichnis \\
+		 	\begin{center}
+		 \includegraphics[width=0.90\textwidth]{\BILDER zitat2}
+		 
+		 	\end{center}
+		
+		
+	\end{itemize}
+}
+\frame
+{
+	\frametitle{Quellen: Hinweis für das Setzen}
+	
+	Für das Erstellen der Quellen braucht es mehrere Schritte
+	\begin{itemize}
+		\item Satz mit \thisColor{\LaTeX}: bestimmt die verwendeten Quellen
+		\item Satz mit \thisColor{Biber} (holt die Quellen)
+		\item Satz mit \thisColor{\LaTeX}: erstellt das Quellenverzeichnis
+		\item (eventuell nochmals \thisColor{\LaTeX})
+		
+	\end{itemize}
+}
+
+%\frame
+%{
+%	\frametitle{auf Wunsch: getrenntes Literatur- \\und Internetquellen-Verzeichnis}
+%	\begin{itemize}
+%		\item die Unterscheidung erfolgt erst unmittelbar vor Fertigstellung der Arbeit
+%		\item eine Kurzanleitung dafür wird auf Wunsch von mir gemacht
+%	\end{itemize}
+%}
+
+\section{nützliche Links}
+\frame
+{
+	\frametitle{Hilfen}
+	\begin{itemize}
+		\item 	im Ordner {\texttt Dokumentationen}\\
+	\item nützliche Links:
+	\begin{itemize}
+		\item \tinyurl{https://latex.tugraz.at/latex/tutorial}
+		\item \tinyurl{https://www.tobiaspaul.net/dokuwiki/doku.php?id=software:latex:tipps_tricks}
+		\item \tinyurl{http://latex.wikia.com/wiki/Main_Page}
+	\end{itemize}
+	\end{itemize}
+	
+}
+\section{Abschluss}
+
+\frame
+{
+	\frametitle{Abschluss}
+Nach diesen ersten Eindrücken von \LaTeX\ sind Sie hoffentlich motiviert, dieses Textsatzprogramm zu verwenden.
+
+Lassen Sie sich von anfänglichen Schwierigkeiten nicht entmutigen, die Investition zahlt sich aus!
+
+\vspace{2ex}
+\thisColor{Ein herzliches Dankeschön geht an}
+	\begin{itemize}
+		\item Sie für Ihr Interesse.
+		\item Herrn Hubert Imhof und Frau Esther Holl (Prorektorin), für die Unterstützung.
+		\item Theo von Arx, der mich auf die Idee dieser Vorlage und GitLab gebracht hat.
+		\item Maximilian Rothstein und alle Schülerinnen und Schüler, welche wertvolle Rückmeldungen gegeben haben.
+	\end{itemize}
+
+\vfill
+{\tiny
+Nota bene: selbstverständlich wurde auch diese Präsentation mit \LaTeX\ erstellt\dots
+}
+}
+
+\end{document}
