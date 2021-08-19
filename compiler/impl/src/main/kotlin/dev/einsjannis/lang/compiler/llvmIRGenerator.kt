@@ -15,15 +15,15 @@ fun generateLlvmIR(functions: List<FunctionImplementation>): kotlin.String {
 }
 
 @Suppress("UNUSED")
-fun Module.type(type: Type): LlvmType = when (type) {
-	Types.Number -> LlvmType.BuiltIn.Number.Integer(64).ptr()
+fun Module.type(type: Type): LlvmType = when {
+	type.id() == Types.Number.id() -> LlvmType.BuiltIn.Number.Integer(64).ptr()
 	else -> throw IllegalStateException()
 }
 
 fun Module.function(function: FunctionImplementation): LlvmFunction =
 	getFunctionByName(function.name) ?: throw IllegalStateException()
 
-class FunctionGenerator(private val module: Module, private val function: LlvmFunction) {
+class FunctionGenerator(private val module: Module, private val function: LlvmFunction.FunctionImplementation) {
 
 	@Suppress("IMPLICIT_CAST_TO_ANY")
 	private fun variable(variableCall: VariableCall): LlvmVariable =
@@ -32,17 +32,27 @@ class FunctionGenerator(private val module: Module, private val function: LlvmFu
 
 	private var tempCount: Int = 0
 
-	private fun generateTempName() = "\$temp$tempCount".also { tempCount++ }
+	private fun generateTempName() = "\$tmp$tempCount".also { tempCount++ }
 
 	private fun addArgument(argument: Variable) {
 		function.addArgument(argument.name, module.type(argument.returnType))
+	}
+
+	private fun addPrintlnCall(functionCall: FunctionCall): LlvmVariable {
+		val arg = addExpression(functionCall.arguments.first())
+		val string = function.addPrimitive(LlvmStringPrimitiveValue("%s"), generateTempName())
+		return function.addFunctionCall(
+			function = module.getFunctionByName("printf")!!,
+			arguments = listOf(string, arg),
+			returnName = generateTempName()
+		)
 	}
 
 	private fun addFunctionCall(functionCall: FunctionCall, varName: kotlin.String? = null): LlvmVariable =
 		when (functionCall.function) {
 			Functions.getDataAtPointer -> TODO()
 			Functions.getPointerOfData -> TODO()
-			Functions.println -> TODO()
+			Functions.println -> addPrintlnCall(functionCall)
 			is FunctionImplementation -> {
 				val toCall = module.function(functionCall.function as FunctionImplementation)
 				val arguments = functionCall.arguments.map { addExpression(it) }
@@ -79,7 +89,18 @@ class FunctionGenerator(private val module: Module, private val function: LlvmFu
 	}
 
 	companion object {
+		private var initializedModules: MutableList<Module> = mutableListOf()
+		private var Module.initialized: kotlin.Boolean
+			get() = initializedModules.contains(this)
+			set(value) { if (value) initializedModules.add(this) else initializedModules.remove(this) }
+		private fun Module.addPrintfImport() =
+			addFunctionDeclaration("printf", LlvmType.BuiltIn.Number.Integer(32))
+		private fun Module.initialize() {
+			addPrintfImport()
+			initialized = true
+		}
 		fun Module.addFunction(function: FunctionImplementation) {
+			if (!this.initialized) this.initialize()
 			val f = addFunction(function.name, type(function.returnType))
 			val generator = FunctionGenerator(this, f)
 			function.arguments.forEach { generator.addArgument(it) }
@@ -102,6 +123,11 @@ class FunctionGenerator(private val module: Module, private val function: LlvmFu
 	inner class NumberArrayPrimitiveValue(val value: LongArray) : PrimitiveValue() {
 		override val type: dev.einsjannis.compiler.llvm.Type = module.type(Types.Number)
 		override fun asString(): kotlin.String = TODO()
+	}
+
+	inner class LlvmStringPrimitiveValue(val string: kotlin.String) : PrimitiveValue() {
+		override val type: LlvmType = LlvmType.BuiltIn.Array(LlvmType.BuiltIn.Number.Integer(8), string.length)
+		override fun asString(): kotlin.String = "\"$string\""
 	}
 
 }

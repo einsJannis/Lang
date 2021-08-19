@@ -8,3 +8,7 @@ dependencies {
 	implementation(project(":parserLib"))
 	implementation(project(":llvm"))
 }
+
+repositories {
+	mavenCentral()
+}

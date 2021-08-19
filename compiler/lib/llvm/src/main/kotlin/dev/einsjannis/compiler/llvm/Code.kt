@@ -6,12 +6,12 @@ interface Code : IRElement {
 		val value: Variable
 	) : Code {
 
-		override fun generateIR(): String = "ret $value"
+		override fun generateIR(): String = "ret ${value.generateNameIR()}"
 
 	}
 
 	class FunctionCall(
-		val function: LocalFunction,
+		val function: Function,
 		val arguments: List<Variable>,
 		override val name: String
 	) : Code, IRElement.Named.Local {
@@ -33,7 +33,7 @@ interface Code : IRElement {
 
 	}
 
-	class StructVariableCall(
+	/*class StructVariableCall(
 		override val type: Type.StructType,
 		val fieldName: String,
 		val variable: Variable,
@@ -45,7 +45,7 @@ interface Code : IRElement {
 			return "${generateNameIR()} = getelementptr ${type.generateNameIR()}, ${type.ptr().generateNameIR()} ${variable.generateNameIR()}, ${inner.second} ${inner.first}"
 		}
 
-	}
+	}*/
 
 	class VarAlias(
 		val variable: Variable,

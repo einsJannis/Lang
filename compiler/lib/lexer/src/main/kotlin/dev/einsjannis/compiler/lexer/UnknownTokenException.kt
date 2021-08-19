@@ -17,7 +17,10 @@ class UnknownTokenException(val index: Int, val content: String, val path: Path)
     val column: Int get() = position.x
 
     val context: String by lazy {
-        content.substring(index).let { it.substring(0, it.indexOf(' ')) }
+        content.substring(index).let {
+			val spaceIndex = it.indexOf(' ')
+			if (spaceIndex != -1) it.substring(0, it.indexOf(' ')) else it
+        }
     }
 
     override val message: String

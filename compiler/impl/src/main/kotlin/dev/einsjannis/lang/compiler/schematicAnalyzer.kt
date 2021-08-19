@@ -8,10 +8,10 @@ fun analyse(functions: List<FunctionImplementation>) {
 
 private class FunctionAnalyzer(private val function: FunctionImplementation, private val registeredFunctions: List<Function>) {
 
-	private val registeredDeclarations: MutableList<Declaration> = Types.all.toMutableList()
+	private val registeredDeclarations: MutableList<Declaration> = Functions.all.toMutableList()
 
 	private fun analyseReturnType(type: Type) {
-		if (!Types.all.contains(type)) throw UnknownRefException(type.name, "type")
+		if (!Types.all.any { it.name == type.name }) throw UnknownRefException(type.name, "type")
 	}
 	private fun analyseVariable(variable: Variable) {
 		registeredDeclarations.find { it.equalsExactly(variable) }?.also { throw DeclarationClash(variable, it) }

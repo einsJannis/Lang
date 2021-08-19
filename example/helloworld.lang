@@ -1,3 +1,4 @@
-fun main() {
+fun main(): Number {
 	println("Hello World");
+	return 0b0;
 }

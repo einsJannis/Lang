@@ -7,13 +7,13 @@ fun main(args: Array<String> ) {
 	val inPath = Path.of(args[0])
 	val outPath = Path.of(args[1])
 	val out = compile(inPath)
-	outPath.toFile().writeBytes(out)
+	outPath.toFile().writeBytes(out.toByteArray())
 }
 
-fun compile(path: Path): ByteArray {
+fun compile(path: Path): String {
 	val tokens = lex(path)
 	val functions = parse(tokens)
 	analyse(functions)
 	val llvmIR = generateLlvmIR(functions)
-	return llvmIR.toByteArray()
+	return llvmIR
 }

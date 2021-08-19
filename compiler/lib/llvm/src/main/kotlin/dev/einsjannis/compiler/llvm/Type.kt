@@ -35,16 +35,23 @@ sealed interface Type : IRElement.Named.Global {
 		}
 
 		class FunctionType(
-			private val function: LocalFunction
+			private val function: Function
 		) : BuiltIn {
 
 			override val name: String get() = "${function.returnType.generateNameIR()} (${function.arguments.joinToString { it.type.generateNameIR() }})"
 
 		}
 
+		class Array<T : Type>(
+			private val child: T,
+			private val size: Int
+		) : BuiltIn {
+			override val name: String get() = "[$size x ${child.generateNameIR()}]"
+		}
+
 	}
 
-	class StructType(
+	/*class StructType(
 		override val name: String,
 		private val childTypes: MutableList<Pair<String, Type>> = mutableListOf()
 	) : Type {
@@ -66,6 +73,6 @@ sealed interface Type : IRElement.Named.Global {
 		override fun generateIR(): String =
 			"${generateNameIR()} = type {${childTypes.joinToString { it.second.generateNameIR() }}}"
 
-	}
+	}*/
 
 }

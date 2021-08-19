@@ -48,6 +48,8 @@ abstract class SequencePatternGeneratorTask : DefaultTask() {
         )
     }>) -> N) = object : Pattern<N> {
 
+			override val name: String = "sequence$index (TODO)" //TODO
+
             @Suppress("UNCHECKED_CAST")
             override fun match(tokens: AdvancedIterator<Token>): Match<N> {
                 tokens.pushContext()

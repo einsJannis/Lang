@@ -9,6 +9,8 @@ import dev.einsjannis.tupleOf
 
 interface Pattern<out T> {
 
+	val name: String
+
     fun match(tokens: AdvancedIterator<Token>): Match<T>
 
 }
@@ -21,6 +23,8 @@ fun <T> AdvancedIterator<Token>.match(pattern: Pattern<T>): Match<T> {
 }
 
 class TokenPattern(val tokenType: TokenType) : Pattern<Token> {
+
+	override val name: String = "token pattern (${tokenType.name})"
 
     override fun match(tokens: AdvancedIterator<Token>): Match<Token> {
         if (!tokens.hasNext()) return NoMatch(NoMatch.Cause.NoTokensLeft(tokenType))
@@ -38,6 +42,8 @@ val TokenType.pattern: Pattern<Token> get() = TokenPattern(this)
 
 class OptionalPattern<T>(val pattern: Pattern<T>) : Pattern<T?> {
 
+	override val name: String = "optinal pattern (${pattern.name})"
+
     override fun match(tokens: AdvancedIterator<Token>): Match<T?> {
         val match = tokens.match(pattern)
         if (match is NoMatch) {
@@ -52,6 +58,8 @@ class OptionalPattern<T>(val pattern: Pattern<T>) : Pattern<T?> {
 
 class LazyPattern<T>(val lazyPattern: () -> Pattern<T>) : Pattern<T> {
 
+	override val name: String get() = "lazy pattern (${lazyPattern().name})"
+
     override fun match(tokens: AdvancedIterator<Token>): Match<T> =
         tokens.match(lazyPattern())
 
@@ -64,6 +72,8 @@ fun <T> optional(pattern: Pattern<T>) = OptionalPattern(pattern)
 fun <T> superPattern(vararg patterns: Pattern<T>) = superPattern(listOf(*patterns))
 
 fun <T> superPattern(patterns: List<Pattern<T>>) = object : Pattern<T> {
+
+	override val name: String = "super pattern (${ patterns.joinToString { it.name } })"
 
     override fun match(tokens: AdvancedIterator<Token>): Match<T> {
         val failed = mutableListOf<Tuple2<Any, Pattern<T>, NoMatch.Cause>>()
@@ -94,6 +104,8 @@ fun <E : Any, S : Any, LS, LE, T> scopePattern(
 	constructor: (list: List<E>) -> T,
 	requireTrailing: Boolean = false
 ) = object : Pattern<T> {
+
+	override val name: String get() = "scope pattern (element = ${elementPattern.name}, seperatorPatterns = ${separatorPattern.name}, startPattern = ${startPattern.name}, endPattern = ${endPattern.name}, requireTrailing = $requireTrailing)"
 
     val startPattern = limiterPatterns.component1()
     val endPattern = limiterPatterns.component2()

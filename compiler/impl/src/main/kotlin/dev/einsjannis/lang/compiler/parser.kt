@@ -58,7 +58,7 @@ object Patterns {
 	) { VariableCallImpl(it.component1()) }
 
 	val ExpressionPattern : Pattern<Expression> =
-		superPattern(VariableCallPattern, FunctionCallPattern, PrimitivePattern)
+		superPattern(FunctionCallPattern, VariableCallPattern, PrimitivePattern)
 
 	val RETURN_STATEMENT_PATTERN : Pattern<ReturnStatement> = sequence2(
 		tupleOf(Tokens.KeywordReturn.pattern, ExpressionPattern)
@@ -109,6 +109,9 @@ object Patterns {
 
 	val DefinitionsPattern : Pattern<List<FunctionImplementation>> = object : Pattern<List<FunctionImplementation>> {
 
+		override val name: kotlin.String
+			get() = "DefinitionsPattern"
+
 		override fun match(tokens: AdvancedIterator<Token>): Match<List<FunctionImplementation>> {
 			tokens.pushContext()
 			val list = mutableListOf<FunctionImplementation>()
@@ -133,7 +136,7 @@ data class FunctionCallImpl(val name: kotlin.String, override val arguments: Lis
 	override lateinit var function: Function
 	fun id() = buildString {
 		append(name)
-		arguments.forEach { append(it.returnType) }
+		arguments.forEach { append("$${it.returnType.name}") }
 	}
 }
 

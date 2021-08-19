@@ -1,6 +1,7 @@
 package dev.einsjannis.lang.compiler
 
 import dev.einsjannis.compiler.lexer.Token
+import dev.einsjannis.compiler.lexer.ignored
 import dev.einsjannis.compiler.lexer.token
 import java.nio.file.Path
 
@@ -21,10 +22,10 @@ object Tokens {
 	val PrimitiveBoolean by token(Regex("true|false"))
 	val PrimitiveString by token(Regex("\".*\""))
 	val PrimitiveChar by token(Regex("'.'"))
+	val WhiteSpace by ignored(Regex("\\s"))
 }
 
 fun lex(path: Path): List<Token> = dev.einsjannis.compiler.lexer.Lexer(listOf(
-	Tokens.Identifier,
 	Tokens.KeywordFunction,
 	Tokens.KeywordVariable,
 	Tokens.KeywordReturn,
@@ -36,4 +37,10 @@ fun lex(path: Path): List<Token> = dev.einsjannis.compiler.lexer.Lexer(listOf(
 	Tokens.SymbolColon,
 	Tokens.SymbolSemiColon,
 	Tokens.SymbolEqualSign,
+	Tokens.PrimitiveNumber,
+	Tokens.PrimitiveBoolean,
+	Tokens.PrimitiveString,
+	Tokens.PrimitiveChar,
+	Tokens.Identifier,
+	Tokens.WhiteSpace
 )).lex(path)

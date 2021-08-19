@@ -34,15 +34,15 @@ sealed class Function constructor(
 
 		override fun generateIR(): String = """
 		define ${returnType.generateNameIR()} ${generateNameIR()}(${arguments.joinToString { it.generateIR() }}) {
-		${code.joinToString { "    " + it.generateIR() }}
+		${code.joinToString(separator = "\n") { "    " + it.generateIR() }}
 		}
 		""".trimIndent()
 
 		fun addPrimitive(primitiveValue: PrimitiveValue, varName: String): Variable =
-			Code.Primitive(primitiveValue, varName)
+			Code.Primitive(primitiveValue, varName).also { code.add(it) }
 
 		fun addAllocationCall(type: Type, varName: String): Variable =
-			Code.AllocCall(type, varName)
+			Code.AllocCall(type, varName).also { code.add(it) }
 
 	}
 

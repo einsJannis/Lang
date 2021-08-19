@@ -1,11 +1,8 @@
 declare i32 printf(i8* noalias nocapture, ...)
-
-define i32 println$string(i8* %arg0) {
-	%tmp0 = call i32 (i8*, ...)* @printf(i8* "%s\n", i8* %arg0)
-	ret %tmp0
-}
-
 define i32 @main() {
-	call i32 (i8*)* @println(i8* "Hello world")
-	ret 0
+	%$tmp0 = "Hello World!"
+	%$tmp1 = "%s\n"
+	%$tmp2 = call i32 (i8*, ...)* @printf(i8* %$tmp1, i8* %$tmp0)
+	%$tmp3 = 0
+	ret %$tmp3
 }
