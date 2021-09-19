@@ -27,7 +27,7 @@ sealed interface Type : IRElement.Named.Global {
 		}
 
 		class PointerType<T : Type>(
-			private val child: T
+			val child: T
 		) : BuiltIn {
 
 			override val name: String get() = "${child.generateNameIR()}*"
@@ -47,6 +47,10 @@ sealed interface Type : IRElement.Named.Global {
 			private val size: Int
 		) : BuiltIn {
 			override val name: String get() = "[$size x ${child.generateNameIR()}]"
+		}
+
+		object Label : BuiltIn {
+			override val name: String get() = "label"
 		}
 
 	}

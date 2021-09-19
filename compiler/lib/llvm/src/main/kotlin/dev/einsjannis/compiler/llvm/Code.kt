@@ -69,4 +69,127 @@ interface Code : IRElement {
 
 	}
 
+	class StoreCall(val from: Variable, val to: Variable) : Code {
+
+		override fun generateIR(): String =
+			"store ${from.type.generateNameIR()} ${from.generateNameIR()}, ${to.type.generateNameIR()} ${to.generateNameIR()}"
+
+	}
+
+	class Label(override val name: String) : Code, IRElement.Named.Label {
+
+		override val type: Type = Type.BuiltIn.Label
+
+		override fun generateIR(): String = "${generateNameIR()}:"
+
+	}
+
+	class IcmpCall(
+		val operator: IcmpOperator,
+		val op1: Variable,
+		val op2: Variable,
+		override val name: String
+	) : Code, IRElement.Named.Local {
+
+		override val type: Type = Type.BuiltIn.Number.Integer(1)
+
+		override fun generateIR(): String =
+			"${generateNameIR()} = icmp ${operator.name.lowercase()} ${op1.type.generateNameIR()} ${op1.generateNameIR()}, ${op2.generateNameIR()}"
+
+	}
+
+	class BrCall(val condition: Variable, val ifLabelName: String, val elseLabelName: String) : Code {
+
+		override fun generateIR(): String = "br ${condition.type.generateNameIR()}, label $ifLabelName, label $elseLabelName"
+
+	}
+
+	class LoadCall(override val name: String, val ptr: Variable): Code, IRElement.Named.Local {
+
+		override val type: Type get() = (ptr.type as? Type.BuiltIn.PointerType<Type>)?.child ?: throw RuntimeException()
+
+		override fun generateIR(): String = "${generateNameIR()} = load ${type.generateNameIR()}, ${ptr.type.generateNameIR()} ${ptr.generateNameIR()}"
+
+	}
+
+	class AddCall(val a: Variable, val b: Variable, override val name: String) : Code, IRElement.Named.Local {
+
+		override val type: Type get() = a.type
+
+		override fun generateIR(): String = "${generateNameIR()} = add ${type.generateNameIR()} ${a.generateNameIR()}, ${b.generateNameIR()}"
+
+	}
+
+	class SubCall(val a: Variable, val b: Variable, override val name: String) : Code, IRElement.Named.Local {
+
+		override val type: Type get() = a.type
+
+		override fun generateIR(): String = "${generateNameIR()} = sub ${type.generateNameIR()} ${a.generateNameIR()}, ${b.generateNameIR()}"
+
+	}
+
+	class MulCall(val a: Variable, val b: Variable, override val name: String) : Code, IRElement.Named.Local {
+
+		override val type: Type get() = a.type
+
+		override fun generateIR(): String = "${generateNameIR()} = mul ${type.generateNameIR()} ${a.generateNameIR()}, ${b.generateNameIR()}"
+
+	}
+
+	class SDivCall(val a: Variable, val b: Variable, override val name: String) : Code, IRElement.Named.Local {
+
+		override val type: Type get() = a.type
+
+		override fun generateIR(): String = "${generateNameIR()} = sdiv ${type.generateNameIR()} ${a.generateNameIR()}, ${b.generateNameIR()}"
+
+	}
+
+	class SRemCall(val a: Variable, val b: Variable, override val name: String) : Code, IRElement.Named.Local {
+
+		override val type: Type get() = a.type
+
+		override fun generateIR(): String = "${generateNameIR()} = srem ${type.generateNameIR()} ${a.generateNameIR()}, ${b.generateNameIR()}"
+
+	}
+
+	class ShlCall(val a: Variable, val b: Variable, override val name: String) : Code, IRElement.Named.Local {
+
+		override val type: Type get() = a.type
+
+		override fun generateIR(): String = "${generateNameIR()} = shl ${type.generateNameIR()} ${a.generateNameIR()}, ${b.generateNameIR()}"
+
+	}
+
+	class LShrCall(val a: Variable, val b: Variable, override val name: String) : Code, IRElement.Named.Local {
+
+		override val type: Type get() = a.type
+
+		override fun generateIR(): String = "${generateNameIR()} = lshr ${type.generateNameIR()} ${a.generateNameIR()}, ${b.generateNameIR()}"
+
+	}
+
+	class AndCall(val a: Variable, val b: Variable, override val name: String) : Code, IRElement.Named.Local {
+
+		override val type: Type get() = a.type
+
+		override fun generateIR(): String = "${generateNameIR()} = and ${type.generateNameIR()} ${a.generateNameIR()}, ${b.generateNameIR()}"
+
+	}
+
+	class OrCall(val a: Variable, val b: Variable, override val name: String) : Code, IRElement.Named.Local {
+
+		override val type: Type get() = a.type
+
+		override fun generateIR(): String = "${generateNameIR()} = or ${type.generateNameIR()} ${a.generateNameIR()}, ${b.generateNameIR()}"
+
+	}
+
+	class XOrCall(val a: Variable, val b: Variable, override val name: String) : Code, IRElement.Named.Local {
+
+		override val type: Type get() = a.type
+
+		override fun generateIR(): String = "${generateNameIR()} = xor ${type.generateNameIR()} ${a.generateNameIR()}, ${b.generateNameIR()}"
+
+	}
+
 }

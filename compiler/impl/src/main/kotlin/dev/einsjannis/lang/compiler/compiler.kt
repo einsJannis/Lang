@@ -3,17 +3,13 @@ package dev.einsjannis.lang.compiler
 import java.nio.file.Path
 import kotlin.String
 
-fun main(args: Array<String> ) {
-	val inPath = Path.of(args[0])
-	val outPath = Path.of(args[1])
-	val out = compile(inPath)
-	outPath.toFile().writeBytes(out.toByteArray())
+fun main() {
+	println(compile(Path.of("example","helloworld.lang")))
 }
 
 fun compile(path: Path): String {
 	val tokens = lex(path)
 	val functions = parse(tokens)
-	analyse(functions)
-	val llvmIR = generateLlvmIR(functions)
-	return llvmIR
+	functions.analyse()
+	return generate(functions)
 }

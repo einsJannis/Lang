@@ -11,7 +11,7 @@ sealed class Function constructor(
 		override val type: Type
 	) : IRElement.Named.Local {
 
-		override fun generateIR(): String = "$type ${generateNameIR()}"
+		override fun generateIR(): String = "${type.generateNameIR()} ${generateNameIR()}"
 
 	}
 
@@ -22,27 +22,72 @@ sealed class Function constructor(
 		val code: MutableList<Code> = mutableListOf()
 	) : Function(name, returnType, arguments) {
 
-		fun addFunctionCall(function: Function, arguments: List<Variable>, returnName: String): Variable =
-			Code.FunctionCall(function, arguments, returnName).also { code.add(it) }
-
-		fun addReturnStatement(returnVar: Variable) {
-			Code.Return(returnVar).also { code.add(it) }
-		}
-
-		fun addVarAlias(variable: Variable, varName: String): Variable =
-			Code.VarAlias(variable, varName).also { code.add(it) }
-
 		override fun generateIR(): String = """
 		define ${returnType.generateNameIR()} ${generateNameIR()}(${arguments.joinToString { it.generateIR() }}) {
 		${code.joinToString(separator = "\n") { "    " + it.generateIR() }}
 		}
 		""".trimIndent()
 
+		fun addFunctionCall(function: Function, arguments: List<Variable>, returnName: String): Variable =
+			Code.FunctionCall(function, arguments, returnName).also { code.add(it) }
+
+		fun addReturnCall(returnVar: Variable) {
+			Code.Return(returnVar).also { code.add(it) }
+		}
+
+		fun addVarAlias(variable: Variable, varName: String): Variable =
+			Code.VarAlias(variable, varName).also { code.add(it) }
+
 		fun addPrimitive(primitiveValue: PrimitiveValue, varName: String): Variable =
 			Code.Primitive(primitiveValue, varName).also { code.add(it) }
 
 		fun addAllocationCall(type: Type, varName: String): Variable =
 			Code.AllocCall(type, varName).also { code.add(it) }
+
+		fun addStoreCall(from: Variable, to: Variable) =
+			Code.StoreCall(from, to).also { code.add(it) }
+
+		fun addLabel(name: String) =
+			Code.Label(name).also { code.add(it) }
+
+		fun addIcmpCall(operator: IcmpOperator, op1: Variable, op2: Variable, name: String): Variable =
+			Code.IcmpCall(operator, op1, op2, name).also { code.add(it) }
+
+		fun addBrCall(conditionRes: Variable, ifLabelName: String, elseLabelName: String) =
+			Code.BrCall(conditionRes, ifLabelName, elseLabelName).also { code.add(it) }
+
+		fun addLoadCall(name: String, ptr: Variable): Variable =
+			Code.LoadCall(name, ptr).also { code.add(it) }
+
+		fun addAddCall(a: Variable, b: Variable, varName: String): Variable =
+			Code.AddCall(a, b, varName).also { code.add(it) }
+
+		fun addSubCall(a: Variable, b: Variable, varName: String): Variable =
+			Code.SubCall(a, b, varName).also { code.add(it) }
+
+		fun addMulCall(a: Variable, b: Variable, varName: String): Variable =
+			Code.MulCall(a, b, varName).also { code.add(it) }
+
+		fun addSDivCall(a: Variable, b: Variable, varName: String): Variable =
+			Code.SDivCall(a, b, varName).also { code.add(it) }
+
+		fun addSRemCall(a: Variable, b: Variable, varName: String): Variable =
+			Code.SRemCall(a, b, varName).also { code.add(it) }
+
+		fun addShlCall(a: Variable, b: Variable, varName: String): Variable =
+			Code.ShlCall(a, b, varName).also { code.add(it) }
+
+		fun addLShrCall(a: Variable, b: Variable, varName: String): Variable =
+			Code.LShrCall(a, b, varName).also { code.add(it) }
+
+		fun addAndCall(a: Variable, b: Variable, varName: String): Variable =
+			Code.AndCall(a, b, varName).also { code.add(it) }
+
+		fun addOrCall(a: Variable, b: Variable, varName: String): Variable =
+			Code.OrCall(a, b, varName).also { code.add(it) }
+
+		fun addXOrCall(a: Variable, b: Variable, varName: String): Variable =
+			Code.XOrCall(a, b, varName).also { code.add(it) }
 
 	}
 
@@ -66,4 +111,17 @@ sealed class Function constructor(
 		return argument
 	}
 
+}
+
+enum class IcmpOperator {
+	EQ,
+	NE,
+	UGT,
+	UGE,
+	ULT,
+	ULE,
+	SGT,
+	SGE,
+	SLT,
+	SLE
 }

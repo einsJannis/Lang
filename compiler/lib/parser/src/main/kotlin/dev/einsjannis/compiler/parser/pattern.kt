@@ -16,9 +16,9 @@ interface Pattern<out T> {
 }
 
 fun <T> AdvancedIterator<Token>.match(pattern: Pattern<T>): Match<T> {
-    //println("Matching for ${dev.einsjannis.compiler.parser.getPattern.name}")
+    println("Matching for ${pattern.name}")
     val match = pattern.match(this)
-    //println("${dev.einsjannis.compiler.parser.getPattern.name}: ${if (match is dev.einsjannis.compiler.parser.NoMatch) "dev.einsjannis.compiler.parser.NoMatch" else "dev.einsjannis.compiler.parser.Match"}")
+    println("${pattern.name}: ${if (match is NoMatch) "dev.einsjannis.compiler.parser.NoMatch" else "dev.einsjannis.compiler.parser.Match"}")
     return match
 }
 
@@ -87,6 +87,28 @@ fun <T> superPattern(patterns: List<Pattern<T>>) = object : Pattern<T> {
         }
         return NoMatch(NoMatch.Cause.PatternMissMatches(failed.map { it.castTo(NoMatch.Cause::PatternMissMatch) }))
     }
+
+}
+
+fun <E : Any> superScopePattern(elementPattern: Pattern<E>) = object : Pattern<List<E>> {
+
+	override val name: String = "simple scope pattern (element = ${elementPattern.name})"
+
+	override fun match(tokens: AdvancedIterator<Token>): Match<List<E>> {
+		tokens.pushContext()
+		val list = buildList {
+			while (true) {
+				val elementMatch = tokens.match(elementPattern)
+				if (elementMatch is NoMatch) {
+					if (elementMatch.cause.causedBy(NoMatch.Cause.NoTokensLeft::class)) break
+					tokens.popContext()
+					return NoMatch(NoMatch.Cause.PatternMissMatch(elementPattern, elementMatch.cause))
+				}
+				add(elementMatch.node)
+			}
+		}
+		return ValidMatch(list)
+	}
 
 }
 

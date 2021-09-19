@@ -1,4 +1,4 @@
-fun main(): Number {
+fun main(): Long {
 	println("Hello World");
-	return 0b0;
+	return 0;
 }

@@ -24,6 +24,12 @@ interface IRElement {
 
 		}
 
+		interface Label : Named {
+
+			override fun generateNameIR(): String = name
+
+		}
+
 	}
 
 }

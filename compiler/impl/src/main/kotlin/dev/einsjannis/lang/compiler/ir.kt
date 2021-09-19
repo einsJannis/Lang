@@ -1,47 +1,48 @@
 package dev.einsjannis.lang.compiler
 
-sealed interface Declaration {
-	val name: kotlin.String
+import kotlin.String
+import kotlin.Boolean
+import kotlin.Long
+import kotlin.Byte
+
+interface Named {
+	val name: String
+	fun id(): String = name
 }
 
-sealed interface Function : Declaration {
-	val arguments: List<Variable>
+interface Type : Named
+
+sealed interface Returnable {
 	val returnType: Type
 }
 
-fun Declaration.id() = buildString {
-	append(name)
-	if (this@id is Function) arguments.forEach { append("$${it.returnType.name}") }
-}
+interface Variable : Named, Returnable
 
-fun Declaration.equalsExactly(other: Any?): kotlin.Boolean = other is Declaration && other.id() == this.id()
+interface Function : Named, Returnable {
+	val arguments: List<Variable>
+	override fun id() = "$name${arguments.joinToString("") { "$${it.returnType.name}" }}"
+}
 
 interface FunctionImplementation : Function {
 	val code: List<Statement>
 }
 
-interface Type : Declaration
-
-interface Variable : Statement, Declaration {
-	val returnType: Type
-}
-
 sealed interface Statement
 
-sealed interface Expression : Statement {
-	val returnType: Type
+interface ConditionStatement : Statement {
+	val condition: Expression
+	val code: List<Statement>
+	val other: ConditionStatement?
 }
 
-interface Assignment : Statement {
-	val variable: Variable
+interface AssignmentStatement : Statement {
+	val variableCall: VariableCall
 	val expression: Expression
 }
 
-interface VariableCall : Expression {
-	val variable: Variable
-	override val returnType: Type
-		get() = variable.returnType
-}
+interface VariableDef : Statement, Variable
+
+sealed interface Expression : Statement, Returnable
 
 interface FunctionCall : Expression {
 	val function: Function
@@ -50,32 +51,48 @@ interface FunctionCall : Expression {
 		get() = function.returnType
 }
 
+interface VariableCall : Expression {
+	val variable: Variable
+	override val returnType: Type
+		get() = variable.returnType
+}
+
 sealed interface Primitive : Expression {
 	val value: Any
 }
 
-interface Number : Primitive {
-	override val value: Long
-	override val returnType: Type
-		get() = Types.Number
+sealed interface Number : Primitive {
+	override val value: kotlin.Number
 }
 
-interface Boolean : Primitive {
-	override val value: kotlin.Boolean
+interface Long : Number {
 	override val returnType: Type
-		get() = Types.Number
+		get() = Types.Long
+	override val value: Long
+}
+
+interface Byte : Number {
+	override val returnType: Type
+		get() = Types.Byte
+	override val value: Byte
+}
+
+interface Character : Primitive {
+	override val returnType: Type
+		get() = Types.Byte
+	override val value: Char
 }
 
 interface String : Primitive {
-	override val value: kotlin.String
 	override val returnType: Type
-		get() = Types.Number
+		get() = Types.String
+	override val value: String
 }
 
-interface Char : Primitive {
-	override val value: kotlin.Char
+interface Boolean : Primitive {
 	override val returnType: Type
-		get() = Types.Number
+		get() = Types.Byte
+	override val value: Boolean
 }
 
 interface ReturnStatement : Statement {
