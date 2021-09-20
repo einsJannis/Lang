@@ -85,11 +85,24 @@ interface Code : IRElement {
 	}
 
 	class IcmpCall(
-		val operator: IcmpOperator,
+		val operator: Operator,
 		val op1: Variable,
 		val op2: Variable,
 		override val name: String
 	) : Code, IRElement.Named.Local {
+
+		enum class Operator {
+			EQ,
+			NE,
+			UGT,
+			UGE,
+			ULT,
+			ULE,
+			SGT,
+			SGE,
+			SLT,
+			SLE
+		}
 
 		override val type: Type = Type.BuiltIn.Number.Integer(1)
 
@@ -104,9 +117,7 @@ interface Code : IRElement {
 
 	}
 
-	class LoadCall(override val name: String, val ptr: Variable): Code, IRElement.Named.Local {
-
-		override val type: Type get() = (ptr.type as? Type.BuiltIn.PointerType<Type>)?.child ?: throw RuntimeException()
+	class LoadCall(override val name: String, val ptr: Variable, override val type: Type): Code, IRElement.Named.Local {
 
 		override fun generateIR(): String = "${generateNameIR()} = load ${type.generateNameIR()}, ${ptr.type.generateNameIR()} ${ptr.generateNameIR()}"
 

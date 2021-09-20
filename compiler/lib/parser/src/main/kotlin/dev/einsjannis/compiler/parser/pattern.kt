@@ -15,12 +15,7 @@ interface Pattern<out T> {
 
 }
 
-fun <T> AdvancedIterator<Token>.match(pattern: Pattern<T>): Match<T> {
-    println("Matching for ${pattern.name}")
-    val match = pattern.match(this)
-    println("${pattern.name}: ${if (match is NoMatch) "dev.einsjannis.compiler.parser.NoMatch" else "dev.einsjannis.compiler.parser.Match"}")
-    return match
-}
+fun <T> AdvancedIterator<Token>.match(pattern: Pattern<T>): Match<T> = pattern.match(this)
 
 class TokenPattern(val tokenType: TokenType) : Pattern<Token> {
 

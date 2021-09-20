@@ -24,6 +24,22 @@ object Functions {
 	val orByte = operation(Types.Byte, "or")
 	val xorLong = operation(Types.Long, "xor")
 	val xorByte = operation(Types.Byte, "xor")
+	val byteAt = function("byteAt", Types.Byte, variable("pointer", Types.Pointer))
+	val longAt = function("longAt", Types.Long, variable("pointer", Types.Pointer))
+	val stringAt = function("stringAt", Types.String, variable("pointer", Types.Pointer))
+	val pointerAt = function("pointerAt", Types.Pointer, variable("pointer", Types.Pointer))
+	val pointerOfByte = function("pointerOf", Types.Pointer, variable("byte", Types.Byte))
+	val pointerOfLong = function("pointerOf", Types.Pointer, variable("long", Types.Long))
+	val pointerOfString = function("pointerOf", Types.Pointer, variable("string", Types.String))
+	val pointerOfPointer = function("pointerOf", Types.Pointer, variable("pointer", Types.Pointer))
+	val equalByte = operation(Types.Byte, "equals")
+	val equalLong = function("equals", Types.Byte, variable("arg0", Types.Long), variable("arg1", Types.Long))
+	val equalString = function("equals", Types.Byte, variable("arg0", Types.String), variable("arg1", Types.String))
+	val equalPointer = function("equals", Types.Byte, variable("arg0", Types.Pointer), variable("arg1", Types.Pointer))
+	val notByte = operation(Types.Byte, "not")
+	val notLong = operation(Types.Long, "not")
+	val pointerToLong = function("pointerToLong", Types.Long, variable("pointer", Types.Pointer))
+	val longToPointer = function("longToPointer", Types.Pointer, variable("long", Types.Long))
 	val all: List<Function> = listOf(
 		println,
 		addLong,
@@ -45,7 +61,23 @@ object Functions {
 		orLong,
 		orByte,
 		xorLong,
-		xorByte
+		xorByte,
+		byteAt,
+		longAt,
+		stringAt,
+		pointerAt,
+		pointerOfByte,
+		pointerOfLong,
+		pointerOfString,
+		pointerOfPointer,
+		equalByte,
+		//equalLong,
+		//equalString,
+		//equalPointer,
+		//notByte,
+		//notLong,
+		//pointerToLong,
+		//longToPointer
 	)
 }
 

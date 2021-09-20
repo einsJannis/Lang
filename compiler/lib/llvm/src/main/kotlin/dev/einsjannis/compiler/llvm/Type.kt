@@ -14,6 +14,18 @@ sealed interface Type : IRElement.Named.Global {
 
 			override val name: String get() = "void"
 
+			val variable = object : IRElement.Named {
+
+				override val name: String = "void"
+
+				override val type: Type = VoidType
+
+				override fun generateNameIR(): String = name
+
+				override fun generateIR(): String = name
+
+			}
+
 		}
 
 		interface Number : BuiltIn {

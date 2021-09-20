@@ -17,8 +17,9 @@ fun generate(functions: List<FunctionImplementation>): kotlin.String {
 fun Module.type(type: dev.einsjannis.lang.compiler.Type): Type.BuiltIn.PointerType<Type> = when {
 	type.id() == Types.Byte.id() -> Type.BuiltIn.Number.Integer(8).ptr()
 	type.id() == Types.Long.id() -> Type.BuiltIn.Number.Integer(64).ptr()
-	type.id() == Types.Pointer.id() -> Type.BuiltIn.VoidType.ptr()
+	type.id() == Types.Pointer.id() -> Type.BuiltIn.VoidType.ptr().ptr()
 	type.id() == Types.String.id() -> Type.BuiltIn.Number.Integer(8).ptr().ptr()
+	type.id() == Types.Unit.id() -> Type.BuiltIn.VoidType.ptr()
 	else -> throw IllegalStateException()
 }
 
@@ -54,78 +55,99 @@ private fun Module.initialize() {
 	addByteOr()
 	addLongXOr()
 	addByteXOr()
+	addByteAt()
+	addLongAt()
+	addStringAt()
+	addPointerAt()
+	addPointerOfByte()
+	addPointerOfLong()
+	addPointerOfString()
+	addPointerOfPointer()
+	addEqualByte()
+	//addEqualLong()
 }
-private fun Module.addPrintlnFunction() = functionImpl("println\$String", type(Types.Unit)) {
-	val textPtr = addArgument("textPtr", Type.BuiltIn.Number.Integer(8).ptr())
-	val text = addLoadCall("text", textPtr)
+private fun Module.addPrintlnFunction() = functionImpl(Functions.println) {
+	val text = addLoadCall("text", arguments[0])
 	val primitive = addPrimitive(primitive(Type.BuiltIn.Number.Integer(8).ptr()) {"\"%s\""}, "primitive")
 	addFunctionCall(getFunctionByName("printf")!!, listOf(primitive, text), "ignored")
+	addReturnCall(Type.BuiltIn.VoidType.variable)
 }
 private fun Module.addScanlnFunction() {
 	//TODO
 }
-private fun Module.addLongAdditionFunction() = longOperation("add", LlvmFunction.FunctionImplementation::addAddCall)
-private fun Module.addByteAdditionFunction() = byteOperation("add", LlvmFunction.FunctionImplementation::addAddCall)
+private fun Module.addLongAdditionFunction() =
+	operation(Functions.addLong, LlvmFunction.FunctionImplementation::addAddCall)
+private fun Module.addByteAdditionFunction() =
+	operation(Functions.addByte, LlvmFunction.FunctionImplementation::addAddCall)
 private fun Module.addLongSubtractionFunction() =
-	longOperation("sub", LlvmFunction.FunctionImplementation::addSubCall)
+	operation(Functions.subLong, LlvmFunction.FunctionImplementation::addSubCall)
 private fun Module.addByteSubtractionFunction() =
-	byteOperation("sub", LlvmFunction.FunctionImplementation::addSubCall)
+	operation(Functions.subByte, LlvmFunction.FunctionImplementation::addSubCall)
 private fun Module.addLongMultiplication() =
-	longOperation("mul", LlvmFunction.FunctionImplementation::addMulCall)
+	operation(Functions.mulLong, LlvmFunction.FunctionImplementation::addMulCall)
 private fun Module.addByteMultiplication() =
-	byteOperation("mul", LlvmFunction.FunctionImplementation::addMulCall)
+	operation(Functions.mulByte, LlvmFunction.FunctionImplementation::addMulCall)
 private fun Module.addLongDivision() =
-	longOperation("div", LlvmFunction.FunctionImplementation::addSDivCall)
+	operation(Functions.divLong, LlvmFunction.FunctionImplementation::addSDivCall)
 private fun Module.addByteDivision() =
-	byteOperation("div", LlvmFunction.FunctionImplementation::addSDivCall)
+	operation(Functions.divByte, LlvmFunction.FunctionImplementation::addSDivCall)
 private fun Module.addLongRemainder() =
-	longOperation("rem", LlvmFunction.FunctionImplementation::addSRemCall)
+	operation(Functions.remLong, LlvmFunction.FunctionImplementation::addSRemCall)
 private fun Module.addByteRemainder() =
-	byteOperation("rem", LlvmFunction.FunctionImplementation::addSRemCall)
+	operation(Functions.remByte, LlvmFunction.FunctionImplementation::addSRemCall)
 private fun Module.addLongShiftLeft() =
-	longOperation("shl", LlvmFunction.FunctionImplementation::addShlCall)
+	operation(Functions.shlLong, LlvmFunction.FunctionImplementation::addShlCall)
 private fun Module.addByteShiftLeft() =
-	byteOperation("shl", LlvmFunction.FunctionImplementation::addShlCall)
+	operation(Functions.shlByte, LlvmFunction.FunctionImplementation::addShlCall)
 private fun Module.addLongShiftRight() =
-	longOperation("shr", LlvmFunction.FunctionImplementation::addLShrCall)
+	operation(Functions.subLong, LlvmFunction.FunctionImplementation::addLShrCall)
 private fun Module.addByteShiftRight() =
-	byteOperation("shr", LlvmFunction.FunctionImplementation::addLShrCall)
+	operation(Functions.shrByte, LlvmFunction.FunctionImplementation::addLShrCall)
 private fun Module.addLongAnd() =
-	longOperation("and", LlvmFunction.FunctionImplementation::addAndCall)
+	operation(Functions.andLong, LlvmFunction.FunctionImplementation::addAndCall)
 private fun Module.addByteAnd() =
-	byteOperation("and", LlvmFunction.FunctionImplementation::addAndCall)
+	operation(Functions.andByte, LlvmFunction.FunctionImplementation::addAndCall)
 private fun Module.addLongOr() =
-	longOperation("or", LlvmFunction.FunctionImplementation::addOrCall)
+	operation(Functions.orLong, LlvmFunction.FunctionImplementation::addOrCall)
 private fun Module.addByteOr() =
-	byteOperation("or", LlvmFunction.FunctionImplementation::addOrCall)
+	operation(Functions.orByte, LlvmFunction.FunctionImplementation::addOrCall)
 private fun Module.addLongXOr() =
-	longOperation("xor", LlvmFunction.FunctionImplementation::addXOrCall)
+	operation(Functions.xorLong, LlvmFunction.FunctionImplementation::addXOrCall)
 private fun Module.addByteXOr() =
-	byteOperation("xor", LlvmFunction.FunctionImplementation::addXOrCall)
+	operation(Functions.xorByte, LlvmFunction.FunctionImplementation::addXOrCall)
+private fun Module.addByteAt() = dataAt(Functions.byteAt)
+private fun Module.addLongAt() = dataAt(Functions.longAt)
+private fun Module.addStringAt() = dataAt(Functions.stringAt)
+private fun Module.addPointerAt() = dataAt(Functions.pointerAt)
+private fun Module.dataAt(function: Function) = functionImpl(function) {
+	addReturnCall(addLoadCall("result", arguments[0], returnType))
+}
+private fun Module.addPointerOfByte() = pointerOf(Functions.pointerOfByte)
+private fun Module.addPointerOfLong() = pointerOf(Functions.pointerOfLong)
+private fun Module.addPointerOfString() = pointerOf(Functions.pointerOfString)
+private fun Module.addPointerOfPointer() = pointerOf(Functions.pointerOfPointer)
+private fun Module.pointerOf(function: Function) = functionImpl(function) {
+	addReturnCall(addStoreCall(addAllocationCall(type(Types.Pointer), "result"), arguments[0]))
+}
+private fun Module.addEqualByte() = functionImpl(Functions.equalByte) {
+	addReturnCall(addFunctionCall(function(Functions.subByte), arguments, "result"))
+}
+private fun Module.addEqualLong(): Unit = /*functionImpl(Functions.equalLong) {
+	val tmp = addFunctionCall(function(Functions.subLong), arguments, "result")
+}*/TODO()
 
 typealias OperationFunction = LlvmFunction.FunctionImplementation.(LlvmVariable, LlvmVariable, kotlin.String) -> LlvmVariable
 
-private fun Module.longOperation(operationName: kotlin.String, operationF: OperationFunction) =
-	operation("Long", type(Types.Long), operationName, operationF)
-
-private fun Module.byteOperation(operationName: kotlin.String, operationF: OperationFunction) =
-	operation("Byte", type(Types.Byte), operationName, operationF)
-
-private fun Module.operation(
-	typeName: kotlin.String,
-	type: Type,
-	operationName: kotlin.String,
-	operation: OperationFunction
-) = functionImpl("$operationName\$$typeName\$$typeName", type) {
-	val (arg0, arg1) = args(2, type)
-	addReturnCall(operation(arg0, arg1, "result"))
+private fun Module.operation(function: Function, operation: OperationFunction) = functionImpl(function) {
+	addReturnCall(operation(arguments[0], arguments[1], "result"))
 }
 
-private fun LlvmFunction.args(amount: Int, type: Type, name: kotlin.String = "arg") =
-	(0 until amount).map { addArgument(name + it, type) }
+private fun Module.functionImpl(function: Function, block: LlvmFunction.FunctionImplementation.() -> Unit) =
+	addFunction(function.id(), type(function.returnType)).apply {
+		function.arguments.forEach { addArgument(it.name, type(it.returnType)) }
+		block()
+	}
 
-private fun Module.functionImpl(name: kotlin.String, returnType: Type, block: LlvmFunction.FunctionImplementation.() -> Unit) =
-	addFunction(name, returnType).block()
 private fun primitive(type: Type, asString: () -> kotlin.String) = object : PrimitiveValue() {
 	override val type: Type = type
 	override fun asString(): kotlin.String = asString()
@@ -157,15 +179,9 @@ class FunctionGenerator(private val module: Module, private val function: LlvmFu
 	private fun addConditionStatement(conditionStatement: ConditionStatement) {
 		val condition = addExpression(conditionStatement.condition)
 		val conditionRes = function.addIcmpCall(
-			IcmpOperator.EQ,
+			Code.IcmpCall.Operator.EQ,
 			condition,
-			function.addPrimitive(
-				object : PrimitiveValue() {
-					override val type: Type = condition.type
-					override fun asString(): kotlin.String = "0"
-				},
-				tmpName()
-			),
+			function.addPrimitive(primitive(condition.type) { "0" }, tmpName()),
 			tmpName()
 		)
 		val ifLabelName = "if" + tmpName()
