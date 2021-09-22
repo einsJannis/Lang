@@ -1,4 +1,15 @@
 fun main(): Long {
-	println("Hello World");
+	putChar('H');
+	putChar('e');
+	putChar('l');
+	putChar('l');
+	putChar('o');
+	putChar(' ');
+	putChar('w');
+	putChar('o');
+	putChar('r');
+	putChar('l');
+	putChar('d');
+	putChar(10b);
 	return 0;
 }

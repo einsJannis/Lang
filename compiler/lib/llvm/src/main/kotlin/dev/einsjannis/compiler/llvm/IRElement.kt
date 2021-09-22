@@ -30,6 +30,18 @@ interface IRElement {
 
 		}
 
+		object Null : Named {
+
+			override val name: String = "null"
+
+			override val type: Type = Type.BuiltIn.Number.Integer(8).ptr()
+
+			override fun generateNameIR(): String = name
+
+			override fun generateIR(): String = name
+
+		}
+
 	}
 
 }

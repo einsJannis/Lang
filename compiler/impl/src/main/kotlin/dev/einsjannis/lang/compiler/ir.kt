@@ -83,11 +83,11 @@ interface Character : Primitive {
 	override val value: Char
 }
 
-interface String : Primitive {
+/*interface String : Primitive {
 	override val returnType: Type
 		get() = Types.String
 	override val value: String
-}
+}*/
 
 interface Boolean : Primitive {
 	override val returnType: Type

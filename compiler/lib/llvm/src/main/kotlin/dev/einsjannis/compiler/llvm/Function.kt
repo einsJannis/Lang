@@ -41,8 +41,8 @@ sealed class Function constructor(
 		fun addVarAlias(variable: Variable, varName: String): Variable =
 			Code.VarAlias(variable, varName).also { code.add(it) }
 
-		fun addPrimitive(primitiveValue: PrimitiveValue, varName: String): Variable =
-			Code.Primitive(primitiveValue, varName).also { code.add(it) }
+		fun addPrimitive(primitiveValue: PrimitiveValue): Variable =
+			Code.Primitive(primitiveValue)
 
 		fun addAllocationCall(type: Type, varName: String): Variable =
 			Code.AllocCall(type, varName).also { code.add(it) }
@@ -55,6 +55,9 @@ sealed class Function constructor(
 
 		fun addIcmpCall(operator: Code.IcmpCall.Operator, op1: Variable, op2: Variable, name: String): Variable =
 			Code.IcmpCall(operator, op1, op2, name).also { code.add(it) }
+
+		fun addBrCall(label: String) =
+			Code.UBrCall(label)
 
 		fun addBrCall(conditionRes: Variable, ifLabelName: String, elseLabelName: String) =
 			Code.BrCall(conditionRes, ifLabelName, elseLabelName).also { code.add(it) }
@@ -91,6 +94,9 @@ sealed class Function constructor(
 
 		fun addXOrCall(a: Variable, b: Variable, varName: String): Variable =
 			Code.XOrCall(a, b, varName).also { code.add(it) }
+
+		fun addBitCast(a: Variable, to: Type, varName: String): Variable =
+			Code.BitCast(a, to,  varName)
 
 	}
 

@@ -59,13 +59,16 @@ interface Code : IRElement {
 	}
 
 	class Primitive(
-		val primitiveValue: PrimitiveValue,
-		override val name: String
-	) : Code, IRElement.Named.Local {
+		primitiveValue: PrimitiveValue
+	) : IRElement.Named.Local {
 
 		override val type: Type = primitiveValue.type
 
-		override fun generateIR(): String = "${generateNameIR()} = ${primitiveValue.asString()}"
+		override val name: String = primitiveValue.asString()
+
+		override fun generateNameIR(): String = name
+
+		override fun generateIR(): String = name
 
 	}
 
@@ -113,7 +116,7 @@ interface Code : IRElement {
 
 	class BrCall(val condition: Variable, val ifLabelName: String, val elseLabelName: String) : Code {
 
-		override fun generateIR(): String = "br ${condition.type.generateNameIR()}, label $ifLabelName, label $elseLabelName"
+		override fun generateIR(): String = "br ${condition.type.generateNameIR()} ${condition.generateNameIR()}, label $ifLabelName, label $elseLabelName"
 
 	}
 
@@ -200,6 +203,18 @@ interface Code : IRElement {
 		override val type: Type get() = a.type
 
 		override fun generateIR(): String = "${generateNameIR()} = xor ${type.generateNameIR()} ${a.generateNameIR()}, ${b.generateNameIR()}"
+
+	}
+
+	class BitCast(val a: Variable, override val type: Type, override val name: String) : Code, IRElement.Named.Local {
+
+		override fun generateIR(): String = "${generateNameIR()} = bitcast ${a.type.generateNameIR()} ${a.generateNameIR()} to ${type.generateNameIR()}"
+
+	}
+
+	class UBrCall(val label: String): Code {
+
+		override fun generateIR(): String = "br label $label"
 
 	}
 

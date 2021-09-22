@@ -38,6 +38,7 @@ class SemanticAnalyzer(val functionImplementations: List<FunctionImplementation>
 		private fun analyseVariable(variable: Variable) {
 			analyseID(variable, variables)
 			analyseReturnType(variable.returnType)
+			variables += variable
 		}
 
 		private fun analyseReturnType(returnType: Type) {
@@ -78,8 +79,10 @@ class SemanticAnalyzer(val functionImplementations: List<FunctionImplementation>
 
 		private fun analyseFunCall(functionCall: FunctionCall) {
 			if (functionCall !is FunctionCallImpl) throw RuntimeException("tf?")
-			functionCall.function = functions.find { it.id() == functionCall.id() } ?: throw RuntimeException()
 			functionCall.arguments.forEach { analyseExpression(it) }
+			functionCall.function = functions.find {
+				it.id() == functionCall.id()
+			} ?: throw RuntimeException()
 			functionCall.arguments.zip(functionCall.function.arguments).any { it.first.returnType.id() == it.second.returnType.id() }
 		}
 

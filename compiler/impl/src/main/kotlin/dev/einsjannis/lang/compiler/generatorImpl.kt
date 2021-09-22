@@ -17,24 +17,34 @@ fun generate(functions: List<FunctionImplementation>): kotlin.String {
 fun Module.type(type: dev.einsjannis.lang.compiler.Type): Type.BuiltIn.PointerType<Type> = when {
 	type.id() == Types.Byte.id() -> Type.BuiltIn.Number.Integer(8).ptr()
 	type.id() == Types.Long.id() -> Type.BuiltIn.Number.Integer(64).ptr()
-	type.id() == Types.Pointer.id() -> Type.BuiltIn.VoidType.ptr().ptr()
-	type.id() == Types.String.id() -> Type.BuiltIn.Number.Integer(8).ptr().ptr()
-	type.id() == Types.Unit.id() -> Type.BuiltIn.VoidType.ptr()
+	type.id() == Types.Pointer.id() -> Type.BuiltIn.Number.Integer(8).ptr().ptr()
+	//type.id() == Types.String.id() -> Type.BuiltIn.Number.Integer(8).ptr().ptr()
+	type.id() == Types.Unit.id() -> Type.BuiltIn.Number.Integer(8).ptr()
 	else -> throw IllegalStateException()
 }
 
 fun Module.function(function: Function): LlvmFunction =
 	getFunctionByName(function.id()) ?: throw IllegalStateException()
 
-private fun Module.addPrintfImport() =
-	addFunctionDeclaration("printf", Type.BuiltIn.Number.Integer(32))
-private fun Module.addScanfImport() =
-	addFunctionDeclaration("scanf", Type.BuiltIn.Number.Integer(32))
+/*private fun Module.addPrintfImport() =
+	addFunctionDeclaration("printf", Type.BuiltIn.Number.Integer(16))*/
+/*private fun Module.addScanfImport() =
+	addFunctionDeclaration("scanf", Type.BuiltIn.Number.Integer(16))*/
+private fun Module.addPutCharImport() =
+	addFunctionDeclaration("putchar", Type.BuiltIn.Number.Integer(16)).also {
+		it.addArgument("char", Type.BuiltIn.Number.Integer(8))
+	}
+private fun Module.addGetCharImport() =
+	addFunctionDeclaration("getchar", Type.BuiltIn.Number.Integer(16))
 private fun Module.initialize() {
-	addPrintfImport()
-	addScanfImport()
-	addPrintlnFunction()
-	addScanlnFunction()
+	addPutCharImport()
+	addPutChar()
+	addGetCharImport()
+	addGetChar()
+	//addPrintfImport()
+	//addScanfImport()
+	//addPrintlnFunction()
+	//addScanlnFunction()
 	addLongAdditionFunction()
 	addByteAdditionFunction()
 	addLongSubtractionFunction()
@@ -57,24 +67,34 @@ private fun Module.initialize() {
 	addByteXOr()
 	addByteAt()
 	addLongAt()
-	addStringAt()
+	//addStringAt()
 	addPointerAt()
 	addPointerOfByte()
 	addPointerOfLong()
-	addPointerOfString()
+	//addPointerOfString()
 	addPointerOfPointer()
 	addEqualByte()
 	//addEqualLong()
 }
-private fun Module.addPrintlnFunction() = functionImpl(Functions.println) {
+private fun Module.addPutChar() = functionImpl(Functions.putChar) {
+	val char = addBitCast(addLoadCall("charValue", arguments[0]), Type.BuiltIn.Number.Integer(16), "charInt")
+	addFunctionCall(getFunctionByName("putchar")!!, listOf(char), "ignored")
+	addReturnCall(IRElement.Named.Null)
+}
+private fun Module.addGetChar() = functionImpl(Functions.getChar) {
+	val char = addFunctionCall(getFunctionByName("getchar")!!, listOf(), "charInt")
+	val result = addAllocationCall(type(Types.Byte), "result")
+	addStoreCall(addBitCast(char, Type.BuiltIn.Number.Integer(8), "char"), result)
+	addReturnCall(result)
+}
+/*private fun Module.addPrintlnFunction() = functionImpl(Functions.println) {
 	val text = addLoadCall("text", arguments[0])
 	val primitive = addPrimitive(primitive(Type.BuiltIn.Number.Integer(8).ptr()) {"\"%s\""}, "primitive")
 	addFunctionCall(getFunctionByName("printf")!!, listOf(primitive, text), "ignored")
 	addReturnCall(Type.BuiltIn.VoidType.variable)
 }
 private fun Module.addScanlnFunction() {
-	//TODO
-}
+}*/
 private fun Module.addLongAdditionFunction() =
 	operation(Functions.addLong, LlvmFunction.FunctionImplementation::addAddCall)
 private fun Module.addByteAdditionFunction() =
@@ -117,14 +137,14 @@ private fun Module.addByteXOr() =
 	operation(Functions.xorByte, LlvmFunction.FunctionImplementation::addXOrCall)
 private fun Module.addByteAt() = dataAt(Functions.byteAt)
 private fun Module.addLongAt() = dataAt(Functions.longAt)
-private fun Module.addStringAt() = dataAt(Functions.stringAt)
+//private fun Module.addStringAt() = dataAt(Functions.stringAt)
 private fun Module.addPointerAt() = dataAt(Functions.pointerAt)
 private fun Module.dataAt(function: Function) = functionImpl(function) {
 	addReturnCall(addLoadCall("result", arguments[0], returnType))
 }
 private fun Module.addPointerOfByte() = pointerOf(Functions.pointerOfByte)
 private fun Module.addPointerOfLong() = pointerOf(Functions.pointerOfLong)
-private fun Module.addPointerOfString() = pointerOf(Functions.pointerOfString)
+//private fun Module.addPointerOfString() = pointerOf(Functions.pointerOfString)
 private fun Module.addPointerOfPointer() = pointerOf(Functions.pointerOfPointer)
 private fun Module.pointerOf(function: Function) = functionImpl(function) {
 	addReturnCall(addStoreCall(addAllocationCall(type(Types.Pointer), "result"), arguments[0]))
@@ -132,9 +152,9 @@ private fun Module.pointerOf(function: Function) = functionImpl(function) {
 private fun Module.addEqualByte() = functionImpl(Functions.equalByte) {
 	addReturnCall(addFunctionCall(function(Functions.subByte), arguments, "result"))
 }
-private fun Module.addEqualLong(): Unit = /*functionImpl(Functions.equalLong) {
+/*private fun Module.addEqualLong(): Unit = functionImpl(Functions.equalLong) {
 	val tmp = addFunctionCall(function(Functions.subLong), arguments, "result")
-}*/TODO()
+}*/
 
 typealias OperationFunction = LlvmFunction.FunctionImplementation.(LlvmVariable, LlvmVariable, kotlin.String) -> LlvmVariable
 
@@ -176,21 +196,31 @@ class FunctionGenerator(private val module: Module, private val function: LlvmFu
 	private fun addReturnStatement(returnStatement: ReturnStatement) =
 		function.addReturnCall(addExpression(returnStatement.expression))
 
-	private fun addConditionStatement(conditionStatement: ConditionStatement) {
+	private fun addConditionStatement(conditionStatement: ConditionStatement, endIfLabelName: String? = null) {
 		val condition = addExpression(conditionStatement.condition)
 		val conditionRes = function.addIcmpCall(
 			Code.IcmpCall.Operator.EQ,
 			condition,
-			function.addPrimitive(primitive(condition.type) { "0" }, tmpName()),
+			function.addPrimitive(primitive(condition.type) { "0" }),
 			tmpName()
 		)
 		val ifLabelName = "if" + tmpName()
-		val elseLabelName = "if" + tmpName()
-		function.addBrCall(conditionRes, ifLabelName, elseLabelName)
-		function.addLabel(ifLabelName)
-		conditionStatement.code.forEach { addStatement(it) }
-		function.addLabel(elseLabelName)
-		conditionStatement.other?.let { addConditionStatement(it) }
+		val afterLabelName = endIfLabelName ?: ("endif" + tmpName())
+		val otherBranch = conditionStatement.other
+		if (otherBranch != null) {
+			val elseLabelName = "else" + tmpName()
+			function.addBrCall(conditionRes, ifLabelName, elseLabelName)
+			function.addLabel(ifLabelName)
+			conditionStatement.code.forEach { addStatement(it) }
+			function.addBrCall(afterLabelName)
+			function.addLabel(elseLabelName)
+			addConditionStatement(otherBranch, afterLabelName)
+		} else {
+			function.addBrCall(conditionRes, ifLabelName, afterLabelName)
+			function.addLabel(ifLabelName)
+			conditionStatement.code.forEach { addStatement(it) }
+			function.addLabel(afterLabelName)
+		}
 	}
 
 	private fun addAssignmentStatement(assignmentStatement: AssignmentStatement) =
@@ -214,7 +244,7 @@ class FunctionGenerator(private val module: Module, private val function: LlvmFu
 	}
 
 	private fun addPrimitive(primitive: Primitive, varName: kotlin.String? = null): LlvmVariable {
-		val primitiveValue = function.addPrimitive(primitive.toValue(), tmpName())
+		val primitiveValue = function.addPrimitive(primitive.toValue())
 		val variable = function.addAllocationCall(primitiveValue.type.ptr(), varName ?: tmpName())
 		function.addStoreCall(primitiveValue, variable)
 		return variable
@@ -229,7 +259,7 @@ class FunctionGenerator(private val module: Module, private val function: LlvmFu
 			is Boolean -> primitiveValue(if (this.value) "0" else "1")
 			is Character -> primitiveValue("${this.value.code}")
 			is Number -> primitiveValue("${this.value}")
-			is String -> primitiveValue("\"${this.value}\"")
+			//is String -> primitiveValue("\"${this.value}\"")
 		}
 	}
 

@@ -1,0 +1,21 @@
+fun infiniteOnes(): Unit {
+	putChar('1');
+	return infiniteOnes();
+}
+
+fun main(): Long {
+	putChar('0');
+	putChar('/');
+	putChar('1');
+	putChar(':');
+	var char: Byte;
+	char = getChar();
+	putChar(10b);
+	if (equals(char, '0')) {
+		putChar('0');
+		return 0;
+	} else if (equals(char, '1')) {
+		infiniteOnes();
+	};
+	return main();
+}

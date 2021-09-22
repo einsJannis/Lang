@@ -28,13 +28,13 @@ object Patterns {
 	val Character: Pattern<Character> = sequence1(tupleOf(Tokens.Primitive.Char.pattern)) { (token) -> object : Character {
 		override val value: Char = token.content[1]
 	} }
-	val String: Pattern<String> = sequence1(tupleOf(Tokens.Primitive.String.pattern)) { (token) -> object : String {
+	/*val String: Pattern<String> = sequence1(tupleOf(Tokens.Primitive.String.pattern)) { (token) -> object : String {
 		override val value: kotlin.String = token.content.substring(1, token.content.lastIndex)
-	} }
+	} }*/
 	val Boolean: Pattern<Boolean> = sequence1(tupleOf(Tokens.Primitive.Boolean.pattern)) { (token) -> object : Boolean {
 		override val value: kotlin.Boolean = token.content == "true"
 	} }
-	val Primitives: Pattern<Primitive> = superPattern(Number, Character, String, Boolean)
+	val Primitives: Pattern<Primitive> = superPattern(Number, Character, /*String,*/ Boolean)
 	val VariableCall: Pattern<VariableCall> = sequence1(tupleOf(Identifier)) { (id) -> VariableCallImpl(id) }
 	val FunctionCall: Pattern<FunctionCall> = sequence2(tupleOf(Identifier, scopePattern(
 		elementPattern = lazyPatternMap {
@@ -72,12 +72,13 @@ object Patterns {
 	val Return: Pattern<ReturnStatement> = sequence2(tupleOf(Tokens.Keyword.Return.pattern, Expression)) { (_, expression) -> object : ReturnStatement {
 		override val expression: Expression = expression
 	} }
-	val Code: Pattern<List<Statement>> = scopePattern(
+	val Code: Pattern<List<Statement>> = lazyPatternMap {
+		scopePattern(
 		elementPattern = superPattern(Condition, Variable, Assignment, Return, Expression),
 		separatorPattern = Tokens.Symbol.SemiColon.pattern,
 		limiterPatterns = Tokens.Symbol.BracesPattern,
 		requireTrailing = true
-	)
+	) }
 	val ArgumentDefs: Pattern<List<Variable>> = scopePattern(
 		elementPattern = sequence2(tupleOf(Identifier, ReturnType)) { (id, type) -> object : Variable {
 			override val name: kotlin.String = id
