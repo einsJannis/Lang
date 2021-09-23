@@ -19,7 +19,7 @@ sealed class Function constructor(
 		name: String,
 		returnType: Type,
 		arguments: MutableList<Argument> = mutableListOf(),
-		val code: MutableList<Code> = mutableListOf()
+		val code: MutableList<Code> = mutableListOf(),
 	) : Function(name, returnType, arguments) {
 
 		override fun generateIR(): String {
@@ -44,7 +44,7 @@ sealed class Function constructor(
 		fun addPrimitive(primitiveValue: PrimitiveValue): Variable =
 			Code.Primitive(primitiveValue)
 
-		fun addAllocationCall(type: Type, varName: String): Variable =
+		fun addAllocationCall(type: Type.BuiltIn.PointerType<Type>, varName: String): Variable =
 			Code.AllocCall(type, varName).also { code.add(it) }
 
 		fun addStoreCall(from: Variable, to: Variable) =
@@ -57,7 +57,7 @@ sealed class Function constructor(
 			Code.IcmpCall(operator, op1, op2, name).also { code.add(it) }
 
 		fun addBrCall(label: String) =
-			Code.UBrCall(label)
+			Code.UBrCall(label).also { code.add(it) }
 
 		fun addBrCall(conditionRes: Variable, ifLabelName: String, elseLabelName: String) =
 			Code.BrCall(conditionRes, ifLabelName, elseLabelName).also { code.add(it) }
@@ -96,7 +96,13 @@ sealed class Function constructor(
 			Code.XOrCall(a, b, varName).also { code.add(it) }
 
 		fun addBitCast(a: Variable, to: Type, varName: String): Variable =
-			Code.BitCast(a, to,  varName)
+			Code.BitCast(a, to,  varName).also { code.add(it) }
+
+		fun addZext(a: Variable, to: Type, varName: String): Variable =
+			Code.Zext(a, to, varName).also { code.add(it) }
+
+		fun addTrunc(a: Variable, to: Type, varName: String): Variable =
+			Code.Trunc(a, to, varName).also { code.add(it) }
 
 	}
 

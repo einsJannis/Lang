@@ -32,7 +32,7 @@ fun Module.function(function: Function): LlvmFunction =
 	addFunctionDeclaration("scanf", Type.BuiltIn.Number.Integer(16))*/
 private fun Module.addPutCharImport() =
 	addFunctionDeclaration("putchar", Type.BuiltIn.Number.Integer(16)).also {
-		it.addArgument("char", Type.BuiltIn.Number.Integer(8))
+		it.addArgument("char", Type.BuiltIn.Number.Integer(16))
 	}
 private fun Module.addGetCharImport() =
 	addFunctionDeclaration("getchar", Type.BuiltIn.Number.Integer(16))
@@ -77,21 +77,21 @@ private fun Module.initialize() {
 	//addEqualLong()
 }
 private fun Module.addPutChar() = functionImpl(Functions.putChar) {
-	val char = addBitCast(addLoadCall("charValue", arguments[0]), Type.BuiltIn.Number.Integer(16), "charInt")
+	val char = addZext(addLoadCall("charValue", arguments[0]), Type.BuiltIn.Number.Integer(16), "charInt")
 	addFunctionCall(getFunctionByName("putchar")!!, listOf(char), "ignored")
 	addReturnCall(IRElement.Named.Null)
 }
 private fun Module.addGetChar() = functionImpl(Functions.getChar) {
 	val char = addFunctionCall(getFunctionByName("getchar")!!, listOf(), "charInt")
 	val result = addAllocationCall(type(Types.Byte), "result")
-	addStoreCall(addBitCast(char, Type.BuiltIn.Number.Integer(8), "char"), result)
+	addStoreCall(addTrunc(char, Type.BuiltIn.Number.Integer(8), "char"), result)
 	addReturnCall(result)
 }
 /*private fun Module.addPrintlnFunction() = functionImpl(Functions.println) {
 	val text = addLoadCall("text", arguments[0])
 	val primitive = addPrimitive(primitive(Type.BuiltIn.Number.Integer(8).ptr()) {"\"%s\""}, "primitive")
 	addFunctionCall(getFunctionByName("printf")!!, listOf(primitive, text), "ignored")
-	addReturnCall(Type.BuiltIn.VoidType.variable)
+	addReturnCall(Null)
 }
 private fun Module.addScanlnFunction() {
 }*/
@@ -120,7 +120,7 @@ private fun Module.addLongShiftLeft() =
 private fun Module.addByteShiftLeft() =
 	operation(Functions.shlByte, LlvmFunction.FunctionImplementation::addShlCall)
 private fun Module.addLongShiftRight() =
-	operation(Functions.subLong, LlvmFunction.FunctionImplementation::addLShrCall)
+	operation(Functions.shrLong, LlvmFunction.FunctionImplementation::addLShrCall)
 private fun Module.addByteShiftRight() =
 	operation(Functions.shrByte, LlvmFunction.FunctionImplementation::addLShrCall)
 private fun Module.addLongAnd() =
@@ -135,19 +135,22 @@ private fun Module.addLongXOr() =
 	operation(Functions.xorLong, LlvmFunction.FunctionImplementation::addXOrCall)
 private fun Module.addByteXOr() =
 	operation(Functions.xorByte, LlvmFunction.FunctionImplementation::addXOrCall)
-private fun Module.addByteAt() = dataAt(Functions.byteAt)
-private fun Module.addLongAt() = dataAt(Functions.longAt)
-//private fun Module.addStringAt() = dataAt(Functions.stringAt)
-private fun Module.addPointerAt() = dataAt(Functions.pointerAt)
-private fun Module.dataAt(function: Function) = functionImpl(function) {
+private fun Module.addByteAt() = functionImpl(Functions.byteAt) {
 	addReturnCall(addLoadCall("result", arguments[0], returnType))
+}
+private fun Module.addLongAt() = functionImpl(Functions.longAt) {
+	addReturnCall(addLoadCall("result", addBitCast(arguments[0], type(Types.Long).ptr(), "ptr"), returnType))
+}
+//private fun Module.addStringAt() = dataAt(Functions.stringAt)
+private fun Module.addPointerAt() = functionImpl(Functions.pointerAt) {
+	addReturnCall(addLoadCall("result", addBitCast(arguments[0], type(Types.Pointer).ptr(), "ptr"), returnType))
 }
 private fun Module.addPointerOfByte() = pointerOf(Functions.pointerOfByte)
 private fun Module.addPointerOfLong() = pointerOf(Functions.pointerOfLong)
 //private fun Module.addPointerOfString() = pointerOf(Functions.pointerOfString)
 private fun Module.addPointerOfPointer() = pointerOf(Functions.pointerOfPointer)
 private fun Module.pointerOf(function: Function) = functionImpl(function) {
-	addReturnCall(addStoreCall(addAllocationCall(type(Types.Pointer), "result"), arguments[0]))
+	addReturnCall(addStoreCall(addBitCast(arguments[0], type(Types.Pointer).child, "value"), addAllocationCall(type(Types.Pointer), "result")))
 }
 private fun Module.addEqualByte() = functionImpl(Functions.equalByte) {
 	addReturnCall(addFunctionCall(function(Functions.subByte), arguments, "result"))
@@ -159,7 +162,10 @@ private fun Module.addEqualByte() = functionImpl(Functions.equalByte) {
 typealias OperationFunction = LlvmFunction.FunctionImplementation.(LlvmVariable, LlvmVariable, kotlin.String) -> LlvmVariable
 
 private fun Module.operation(function: Function, operation: OperationFunction) = functionImpl(function) {
-	addReturnCall(operation(arguments[0], arguments[1], "result"))
+	val arg0 = addLoadCall("argv0", arguments[0])
+	val arg1 = addLoadCall("argv1", arguments[1])
+	val result = operation(arg0, arg1, "result")
+	addReturnCall(addStoreCall(result, addAllocationCall(type(function.returnType), "resultPtr")))
 }
 
 private fun Module.functionImpl(function: Function, block: LlvmFunction.FunctionImplementation.() -> Unit) =
@@ -200,15 +206,15 @@ class FunctionGenerator(private val module: Module, private val function: LlvmFu
 		val condition = addExpression(conditionStatement.condition)
 		val conditionRes = function.addIcmpCall(
 			Code.IcmpCall.Operator.EQ,
-			condition,
+			function.addLoadCall("\$conditionv${tmpName()}", condition),
 			function.addPrimitive(primitive(condition.type) { "0" }),
 			tmpName()
 		)
-		val ifLabelName = "if" + tmpName()
-		val afterLabelName = endIfLabelName ?: ("endif" + tmpName())
+		val ifLabelName = "\$if" + tmpName()
+		val afterLabelName = endIfLabelName ?: ("\$endif" + tmpName())
 		val otherBranch = conditionStatement.other
 		if (otherBranch != null) {
-			val elseLabelName = "else" + tmpName()
+			val elseLabelName = "\$else" + tmpName()
 			function.addBrCall(conditionRes, ifLabelName, elseLabelName)
 			function.addLabel(ifLabelName)
 			conditionStatement.code.forEach { addStatement(it) }
@@ -219,12 +225,13 @@ class FunctionGenerator(private val module: Module, private val function: LlvmFu
 			function.addBrCall(conditionRes, ifLabelName, afterLabelName)
 			function.addLabel(ifLabelName)
 			conditionStatement.code.forEach { addStatement(it) }
+			function.addBrCall(afterLabelName)
 			function.addLabel(afterLabelName)
 		}
 	}
 
 	private fun addAssignmentStatement(assignmentStatement: AssignmentStatement) =
-		addExpression(assignmentStatement.expression, assignmentStatement.variableCall.variable.name)
+		addExpression(assignmentStatement.expression, assignmentStatement.variableCall.variable.name + tmpName())
 
 	private fun addVariableDef(variableDef: VariableDef) =
 		function.addAllocationCall(module.type(variableDef.returnType), variableDef.name)
@@ -265,8 +272,8 @@ class FunctionGenerator(private val module: Module, private val function: LlvmFu
 
 	@Suppress("IMPLICIT_CAST_TO_ANY")
 	private fun variable(variableCall: VariableCall): LlvmVariable =
-		(((function.code.find { it is LlvmVariable && it.name == variableCall.variable.name }
-			as? LlvmVariable) ?: function.arguments.find { it.name == variableCall.variable.name }) ?: throw Exception("huh?"))
+		(((function.code.findLast { it is LlvmVariable && it.name.startsWith(variableCall.variable.name) }
+			as? LlvmVariable) ?: function.arguments.findLast { it.name == variableCall.variable.name }) ?: throw Exception("huh?"))
 
 	private var tempCount: Int = 0
 

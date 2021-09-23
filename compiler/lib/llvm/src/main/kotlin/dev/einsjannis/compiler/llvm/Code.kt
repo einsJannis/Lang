@@ -6,7 +6,7 @@ interface Code : IRElement {
 		val value: Variable
 	) : Code {
 
-		override fun generateIR(): String = "ret ${value.generateNameIR()}"
+		override fun generateIR(): String = "ret ${value.type.generateNameIR()} ${value.generateNameIR()}"
 
 	}
 
@@ -20,16 +20,16 @@ interface Code : IRElement {
 			get() = function.returnType
 
 		override fun generateIR(): String =
-			"${generateNameIR()} = call ${function.returnType.generateNameIR()} ${function.generateNameIR()}(${arguments.joinToString { it.generateNameIR() }})"
+			"${generateNameIR()} = call ${function.returnType.generateNameIR()} ${function.generateNameIR()}(${arguments.joinToString { "${it.type.generateNameIR()} ${it.generateNameIR()}" }})"
 
 	}
 
 	class AllocCall(
-		override val type: Type,
+		override val type: Type.BuiltIn.PointerType<Type>,
 		override val name: String
 	) : Code, IRElement.Named.Local {
 
-		override fun generateIR(): String = "${generateNameIR()} = alloca ${type.generateNameIR()}"
+		override fun generateIR(): String = "${generateNameIR()} = alloca ${type.child.generateNameIR()}"
 
 	}
 
@@ -116,7 +116,7 @@ interface Code : IRElement {
 
 	class BrCall(val condition: Variable, val ifLabelName: String, val elseLabelName: String) : Code {
 
-		override fun generateIR(): String = "br ${condition.type.generateNameIR()} ${condition.generateNameIR()}, label $ifLabelName, label $elseLabelName"
+		override fun generateIR(): String = "br ${condition.type.generateNameIR()} ${condition.generateNameIR()}, label %$ifLabelName, label %$elseLabelName"
 
 	}
 
@@ -212,9 +212,21 @@ interface Code : IRElement {
 
 	}
 
+	class Zext(val a: Variable, override val type: Type, override val name: String) : Code, IRElement.Named.Local {
+
+		override fun generateIR(): String = "${generateNameIR()} = zext ${a.type.generateNameIR()} ${a.generateNameIR()} to ${type.generateNameIR()}"
+
+	}
+
+	class Trunc(val a: Variable, override val type: Type, override val name: String) : Code, IRElement.Named.Local {
+
+		override fun generateIR(): String = "${generateNameIR()} = trunc ${a.type.generateNameIR()} ${a.generateNameIR()} to ${type.generateNameIR()}"
+
+	}
+
 	class UBrCall(val label: String): Code {
 
-		override fun generateIR(): String = "br label $label"
+		override fun generateIR(): String = "br label %$label"
 
 	}
 

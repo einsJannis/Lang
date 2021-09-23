@@ -22,6 +22,14 @@ interface IRElement {
 
 			override fun generateNameIR(): String = "@$name"
 
+			class StringConst(override val name: String, val value: String) : Global {
+
+				override val type: Type = Type.BuiltIn.Number.Integer(8).array(name.length + 1)
+
+				override fun generateIR(): String = "${generateNameIR()} = constant ${type.generateNameIR()} c\"$value\\00\""
+
+			}
+
 		}
 
 		interface Label : Named {
