@@ -10,6 +10,16 @@ interface Code : IRElement {
 
 	}
 
+	class NotSavedFunctionCall(
+		val function: Function,
+		val arguments: List<Variable>
+	) : Code {
+
+		override fun generateIR(): String =
+			"call ${function.returnType.generateNameIR()} ${function.generateNameIR()}(${arguments.joinToString { "${it.type.generateNameIR()} ${it.generateNameIR()}" }})"
+
+	}
+
 	class FunctionCall(
 		val function: Function,
 		val arguments: List<Variable>,

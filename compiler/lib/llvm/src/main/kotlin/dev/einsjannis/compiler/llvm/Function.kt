@@ -31,6 +31,10 @@ sealed class Function constructor(
 			""".trimMargin("|")
 		}
 
+		fun addNotSavedFunctionCall(function: Function, arguments: List<Variable>): Unit {
+			Code.NotSavedFunctionCall(function, arguments).also { code.add(it) }
+		}
+
 		fun addFunctionCall(function: Function, arguments: List<Variable>, returnName: String): Variable =
 			Code.FunctionCall(function, arguments, returnName).also { code.add(it) }
 
@@ -62,7 +66,7 @@ sealed class Function constructor(
 		fun addBrCall(conditionRes: Variable, ifLabelName: String, elseLabelName: String) =
 			Code.BrCall(conditionRes, ifLabelName, elseLabelName).also { code.add(it) }
 
-		fun addLoadCall(name: String, ptr: Variable, type: Type = (ptr.type as? Type.BuiltIn.PointerType<*>)?.child ?: throw RuntimeException()): Variable =
+		fun addLoadCall(ptr: Variable, name: String, type: Type = (ptr.type as? Type.BuiltIn.PointerType<*>)?.child ?: throw RuntimeException()): Variable =
 			Code.LoadCall(name, ptr, type).also { code.add(it) }
 
 		fun addAddCall(a: Variable, b: Variable, varName: String): Variable =

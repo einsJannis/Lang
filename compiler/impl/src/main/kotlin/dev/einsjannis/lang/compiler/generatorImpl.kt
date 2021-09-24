@@ -23,6 +23,14 @@ fun Module.type(type: dev.einsjannis.lang.compiler.Type): Type.BuiltIn.PointerTy
 	else -> throw IllegalStateException()
 }
 
+fun Module.size(type: dev.einsjannis.lang.compiler.Type): kotlin.Long = when {
+	type.id() == Types.Byte.id() -> 1L
+	type.id() == Types.Long.id() -> 4L
+	type.id() == Types.Pointer.id() -> 4L
+	type.id() == Types.Unit.id() -> 1L
+	else -> throw IllegalStateException()
+}
+
 fun Module.function(function: Function): LlvmFunction =
 	getFunctionByName(function.id()) ?: throw IllegalStateException()
 
@@ -37,10 +45,13 @@ private fun Module.addPutCharImport() =
 private fun Module.addGetCharImport() =
 	addFunctionDeclaration("getchar", Type.BuiltIn.Number.Integer(16))
 private fun Module.initialize() {
+	addMallocImport()
 	addPutCharImport()
 	addPutChar()
 	addGetCharImport()
 	addGetChar()
+	addNativeFreeDef()
+	addMangledFreeDef()
 	//addPrintfImport()
 	//addScanfImport()
 	//addPrintlnFunction()
@@ -77,13 +88,13 @@ private fun Module.initialize() {
 	//addEqualLong()
 }
 private fun Module.addPutChar() = functionImpl(Functions.putChar) {
-	val char = addZext(addLoadCall("charValue", arguments[0]), Type.BuiltIn.Number.Integer(16), "charInt")
+	val char = addZext(addLoadCall(arguments[0], "charValue"), Type.BuiltIn.Number.Integer(16), "charInt")
 	addFunctionCall(getFunctionByName("putchar")!!, listOf(char), "ignored")
 	addReturnCall(IRElement.Named.Null)
 }
 private fun Module.addGetChar() = functionImpl(Functions.getChar) {
 	val char = addFunctionCall(getFunctionByName("getchar")!!, listOf(), "charInt")
-	val result = addAllocationCall(type(Types.Byte), "result")
+	val result = addFunctionCall(getFunctionByName("malloc")!!, listOf(addPrimitive(primitive(Type.BuiltIn.Number.Integer(64)) { "1" })), "result")
 	addStoreCall(addTrunc(char, Type.BuiltIn.Number.Integer(8), "char"), result)
 	addReturnCall(result)
 }
@@ -95,6 +106,16 @@ private fun Module.addGetChar() = functionImpl(Functions.getChar) {
 }
 private fun Module.addScanlnFunction() {
 }*/
+
+private fun Module.addMallocImport() =
+	addFunctionDeclaration("malloc", Type.BuiltIn.Number.Integer(8).ptr()).also { it.addArgument("size", Type.BuiltIn.Number.Integer(64)) }
+private fun Module.addNativeFreeDef() =
+	addFunctionDeclaration("free", Type.BuiltIn.VoidType).also { it.addArgument("what", Type.BuiltIn.Number.Integer(8).ptr()) }
+private fun Module.addMangledFreeDef() =
+	functionImpl(Functions.free) {
+		addNotSavedFunctionCall(getFunctionByName("free")!!, listOf(addLoadCall(arguments[0], "ptr")))
+		addReturnCall(IRElement.Named.Null)
+	}
 private fun Module.addLongAdditionFunction() =
 	operation(Functions.addLong, LlvmFunction.FunctionImplementation::addAddCall)
 private fun Module.addByteAdditionFunction() =
@@ -136,21 +157,24 @@ private fun Module.addLongXOr() =
 private fun Module.addByteXOr() =
 	operation(Functions.xorByte, LlvmFunction.FunctionImplementation::addXOrCall)
 private fun Module.addByteAt() = functionImpl(Functions.byteAt) {
-	addReturnCall(addLoadCall("result", arguments[0], returnType))
+	addReturnCall(addLoadCall(arguments[0], "result", returnType))
 }
 private fun Module.addLongAt() = functionImpl(Functions.longAt) {
-	addReturnCall(addLoadCall("result", addBitCast(arguments[0], type(Types.Long).ptr(), "ptr"), returnType))
+	addReturnCall(addLoadCall(addBitCast(arguments[0], type(Types.Long).ptr(), "ptr"), "result", returnType))
 }
 //private fun Module.addStringAt() = dataAt(Functions.stringAt)
 private fun Module.addPointerAt() = functionImpl(Functions.pointerAt) {
-	addReturnCall(addLoadCall("result", addBitCast(arguments[0], type(Types.Pointer).ptr(), "ptr"), returnType))
+	addReturnCall(addLoadCall(addBitCast(arguments[0], type(Types.Pointer).ptr(), "ptr"), "result", returnType))
 }
 private fun Module.addPointerOfByte() = pointerOf(Functions.pointerOfByte)
 private fun Module.addPointerOfLong() = pointerOf(Functions.pointerOfLong)
 //private fun Module.addPointerOfString() = pointerOf(Functions.pointerOfString)
 private fun Module.addPointerOfPointer() = pointerOf(Functions.pointerOfPointer)
 private fun Module.pointerOf(function: Function) = functionImpl(function) {
-	addReturnCall(addStoreCall(addBitCast(arguments[0], type(Types.Pointer).child, "value"), addAllocationCall(type(Types.Pointer), "result")))
+	addReturnCall(
+		addStoreCall(addBitCast(arguments[0], type(Types.Pointer).child, "value"),
+		addBitCast(addFunctionCall(getFunctionByName("malloc")!!, listOf(addPrimitive(primitive(Type.BuiltIn.Number.Integer(64)) { "4" })), "result"), type(Types.Pointer), "castedResult")
+	))
 }
 private fun Module.addEqualByte() = functionImpl(Functions.equalByte) {
 	addReturnCall(addFunctionCall(function(Functions.subByte), arguments, "result"))
@@ -162,10 +186,10 @@ private fun Module.addEqualByte() = functionImpl(Functions.equalByte) {
 typealias OperationFunction = LlvmFunction.FunctionImplementation.(LlvmVariable, LlvmVariable, kotlin.String) -> LlvmVariable
 
 private fun Module.operation(function: Function, operation: OperationFunction) = functionImpl(function) {
-	val arg0 = addLoadCall("argv0", arguments[0])
-	val arg1 = addLoadCall("argv1", arguments[1])
+	val arg0 = addLoadCall(arguments[0], "argv0")
+	val arg1 = addLoadCall(arguments[1], "argv1")
 	val result = operation(arg0, arg1, "result")
-	addReturnCall(addStoreCall(result, addAllocationCall(type(function.returnType), "resultPtr")))
+	addReturnCall(addStoreCall(result, addBitCast(addFunctionCall(getFunctionByName("malloc")!!, listOf(addPrimitive(primitive(Type.BuiltIn.Number.Integer(64)) { size(function.returnType).toString() })), "resultPtr"), type(function.returnType), "castedResultPtr")))
 }
 
 private fun Module.functionImpl(function: Function, block: LlvmFunction.FunctionImplementation.() -> Unit) =
@@ -206,7 +230,7 @@ class FunctionGenerator(private val module: Module, private val function: LlvmFu
 		val condition = addExpression(conditionStatement.condition)
 		val conditionRes = function.addIcmpCall(
 			Code.IcmpCall.Operator.EQ,
-			function.addLoadCall("\$conditionv${tmpName()}", condition),
+			function.addLoadCall(condition, "\$conditionv${tmpName()}"),
 			function.addPrimitive(primitive(condition.type) { "0" }),
 			tmpName()
 		)
@@ -231,10 +255,13 @@ class FunctionGenerator(private val module: Module, private val function: LlvmFu
 	}
 
 	private fun addAssignmentStatement(assignmentStatement: AssignmentStatement) =
-		addExpression(assignmentStatement.expression, assignmentStatement.variableCall.variable.name + tmpName())
+		function.addStoreCall(function.addLoadCall(addExpression(assignmentStatement.expression, tmpName()), tmpName()), variable(assignmentStatement.variableCall))
+
+	private fun addMallocCall(type: dev.einsjannis.lang.compiler.Type, name: String) =
+		function.addBitCast(function.addFunctionCall(module.getFunctionByName("malloc")!!, listOf(function.addPrimitive(primitive(Type.BuiltIn.Number.Integer(64)) { "${module.size(type)}" })), "\$malloc$name"), module.type(type), name)
 
 	private fun addVariableDef(variableDef: VariableDef) =
-		function.addAllocationCall(module.type(variableDef.returnType), variableDef.name)
+		addMallocCall(variableDef.returnType, variableDef.name)
 
 	private fun addExpression(expression: Expression, varName: kotlin.String? = null): LlvmVariable = when (expression) {
 		is FunctionCall -> addFunctionCall(expression, varName)
@@ -252,7 +279,7 @@ class FunctionGenerator(private val module: Module, private val function: LlvmFu
 
 	private fun addPrimitive(primitive: Primitive, varName: kotlin.String? = null): LlvmVariable {
 		val primitiveValue = function.addPrimitive(primitive.toValue())
-		val variable = function.addAllocationCall(primitiveValue.type.ptr(), varName ?: tmpName())
+		val variable = addMallocCall(primitive.returnType, varName ?: tmpName())
 		function.addStoreCall(primitiveValue, variable)
 		return variable
 	}
@@ -272,7 +299,7 @@ class FunctionGenerator(private val module: Module, private val function: LlvmFu
 
 	@Suppress("IMPLICIT_CAST_TO_ANY")
 	private fun variable(variableCall: VariableCall): LlvmVariable =
-		(((function.code.findLast { it is LlvmVariable && it.name.startsWith(variableCall.variable.name) }
+		(((function.code.findLast { it is LlvmVariable && it.name == variableCall.variable.name }
 			as? LlvmVariable) ?: function.arguments.findLast { it.name == variableCall.variable.name }) ?: throw Exception("huh?"))
 
 	private var tempCount: Int = 0
