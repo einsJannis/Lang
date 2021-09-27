@@ -10,7 +10,10 @@ fun main(): Long {
 	putChar(':');
 	var char: Byte;
 	char = getChar();
-	if (equals(char, '0')) {
+	var x: Byte;
+	x = equals(char, '0');
+	putChar(x);
+	if (x) {
 		putChar('0');
 		putChar(10b);
 		return 0;
