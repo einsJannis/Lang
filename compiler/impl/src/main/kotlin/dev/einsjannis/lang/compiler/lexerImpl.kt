@@ -36,7 +36,6 @@ object Tokens {
 	object Primitive {
 		val Number by token(Regex("[0-9]+b?"))
 		val Char by token(Regex("'.'"))
-		//val String by token(Regex("\".*\""))
 		val Boolean by token(Regex("true|false"))
 	}
 	val Identifier by token(Regex("[A-z_][A-z_0-9]*"))
@@ -59,7 +58,6 @@ fun lex(path: Path): List<Token> = Lexer(listOf(
 	Tokens.Symbol.EqualSign,
 	Tokens.Primitive.Number,
 	Tokens.Primitive.Char,
-	//Tokens.Primitive.String,
 	Tokens.Primitive.Boolean,
 	Tokens.Identifier,
 	Tokens.WhiteSpace

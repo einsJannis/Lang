@@ -1,5 +1,6 @@
 .idea
 .gradle
 build
-nohup.out
+*.out
 generated
+*.ll

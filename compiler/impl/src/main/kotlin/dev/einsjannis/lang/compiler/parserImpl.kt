@@ -1,15 +1,14 @@
 package dev.einsjannis.lang.compiler
 
-import dev.einsjannis.AdvancedIterator
 import dev.einsjannis.compiler.lexer.Token
 import dev.einsjannis.compiler.parser.*
 import dev.einsjannis.compiler.parser.Pattern
 import dev.einsjannis.tupleOf
 
 object Patterns {
-	val Identifier: Pattern<kotlin.String> = sequence1(tupleOf(Tokens.Identifier.pattern)) { (token) -> token.content }
+	val Identifier: Pattern<String> = sequence1(tupleOf(Tokens.Identifier.pattern)) { (token) -> token.content }
 	val ReturnType: Pattern<Type> = sequence2(tupleOf(Tokens.Symbol.Colon.pattern, Identifier)) { (_, id) -> object : Type {
-		override val name: kotlin.String = id
+		override val name: String = id
 	} }
 	val Number: Pattern<Number> = sequence1(tupleOf(Tokens.Primitive.Number.pattern)) { (token) ->
 		val content = token.content
@@ -28,9 +27,6 @@ object Patterns {
 	val Character: Pattern<Character> = sequence1(tupleOf(Tokens.Primitive.Char.pattern)) { (token) -> object : Character {
 		override val value: Char = token.content[1]
 	} }
-	/*val String: Pattern<String> = sequence1(tupleOf(Tokens.Primitive.String.pattern)) { (token) -> object : String {
-		override val value: kotlin.String = token.content.substring(1, token.content.lastIndex)
-	} }*/
 	val Boolean: Pattern<Boolean> = sequence1(tupleOf(Tokens.Primitive.Boolean.pattern)) { (token) -> object : Boolean {
 		override val value: kotlin.Boolean = token.content == "true"
 	} }
@@ -45,7 +41,7 @@ object Patterns {
 	))) { (id, args) -> FunctionCallImpl(id, args) }
 	val Expression: Pattern<Expression> = superPattern(FunctionCall, VariableCall, Primitives)
 	val Variable: Pattern<VariableDef> = sequence3(tupleOf(Tokens.Keyword.Var.pattern, Identifier, ReturnType)) { (_, id, type) -> object : VariableDef {
-		override val name: kotlin.String = id
+		override val name: String = id
 		override val returnType: Type = type
 	} }
 	val Assignment: Pattern<AssignmentStatement> = sequence3(tupleOf(
@@ -81,7 +77,7 @@ object Patterns {
 	) }
 	val ArgumentDefs: Pattern<List<Variable>> = scopePattern(
 		elementPattern = sequence2(tupleOf(Identifier, ReturnType)) { (id, type) -> object : Variable {
-			override val name: kotlin.String = id
+			override val name: String = id
 			override val returnType: Type = type
 		} },
 		separatorPattern = Tokens.Symbol.Comma.pattern,
@@ -91,7 +87,7 @@ object Patterns {
 		sequence5(tupleOf(
 			Tokens.Keyword.Fun.pattern, Identifier, ArgumentDefs, ReturnType, Code
 		)) { (_, id, args, returnType, code) -> object : FunctionImplementation {
-			override val name: kotlin.String = id
+			override val name: String = id
 			override val arguments: List<Variable> = args
 			override val returnType: Type = returnType
 			override val code: List<Statement> = code
@@ -101,7 +97,7 @@ object Patterns {
 }
 
 internal data class FunctionCallImpl(
-	val functionName: kotlin.String,
+	val functionName: String,
 	override val arguments: List<Expression>
 ) : FunctionCall {
 	private var _function: Function? = null
@@ -112,7 +108,7 @@ internal data class FunctionCallImpl(
 }
 
 internal data class VariableCallImpl(
-	val variableName: kotlin.String,
+	val variableName: String,
 ) : VariableCall {
 	private var _variable: Variable? = null
 	override var variable: Variable
