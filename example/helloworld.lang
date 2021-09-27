@@ -1,0 +1,16 @@
+fun main(): Long {
+	putChar('H');
+	putChar('e');
+	putChar('l');
+	putChar('l');
+	putChar('o');
+	putChar(' ');
+	putChar('w');
+	putChar('o');
+	putChar('r');
+	putChar('l');
+	putChar('d');
+	putChar('!');
+	putChar(10b);
+	return 0;
+}
