@@ -17,17 +17,22 @@ sourceSets {
 }
 
 tasks {
-
+	val tupleGeneratorTask by register<dev.einsjannis.gradle.kotlin.TupleGeneratorTask>("tupleGeneratorTask") {
+		outputDirectory.set(file("src/main/generated"))
+		amountOfTuples.set(16)
+	}
 	withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 		kotlinOptions {
 			optIn("kotlin.contracts.ExperimentalContracts")
 			optIn("kotlin.ExperimentalStdlibApi")
 		}
+		dependsOn(tupleGeneratorTask)
 	}
 
-	register<dev.einsjannis.gradle.kotlin.TupleGeneratorTask>("tupleGeneratorTask") {
-		outputDirectory.set(file("src/main/generated"))
-		amountOfTuples.set(16)
+	named("clean") {
+		doLast {
+			file("src/main/generated").deleteRecursively()
+		}
 	}
 
 }
