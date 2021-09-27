@@ -48,7 +48,7 @@ class FunctionGenerator(private val module: Module, private val function: LlvmFu
 		val conditionRes = function.addIcmpCall(
 			Code.IcmpCall.Operator.EQ,
 			function.addLoadCall(condition, "\$conditionv${tmpName()}"),
-			function.addPrimitive(primitive(condition.type) { "0" }),
+			function.addPrimitive(primitive(condition.type) { "1" }),
 			tmpName()
 		)
 		val ifLabelName = "\$if" + tmpName()

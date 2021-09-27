@@ -35,8 +35,10 @@ object Functions {
 	val equalByte = operation(Types.Byte, "equals")
 	val equalLong =
 		function("equals", Types.Byte, variable("arg0", Types.Long), variable("arg1", Types.Long))
-	val notByte = operation(Types.Byte, "not")
-	val notLong = operation(Types.Long, "not")
+	val notByte =
+		function("not", Types.Byte, variable("arg0", Types.Byte), variable("arg1", Types.Byte))
+	val notLong =
+		function("not", Types.Byte, variable("arg0", Types.Long), variable("arg1", Types.Long))
 	val pointerToLong = function("pointerToLong", Types.Long, variable("pointer", Types.Pointer))
 	val longToPointer = function("longToPointer", Types.Pointer, variable("long", Types.Long))
 	val all: List<Function> = listOf(putChar, getChar, free, addLong, addByte, subLong, subByte, mulLong, mulByte,

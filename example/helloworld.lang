@@ -10,6 +10,7 @@ fun main(): Long {
 	putChar('r');
 	putChar('l');
 	putChar('d');
+	putChar('!');
 	putChar(10b);
 	return 0;
 }

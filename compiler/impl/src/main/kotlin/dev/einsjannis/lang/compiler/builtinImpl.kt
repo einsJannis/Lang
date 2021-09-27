@@ -124,12 +124,40 @@ private fun Module.addPointerOfFunction(function: Function) = functionImpl(funct
 }
 
 private fun Module.addEqualsFunction(function: Function) = functionImpl(function) {
-	addReturnCall(addZext(addIcmpCall(Code.IcmpCall.Operator.EQ, arguments[0], arguments[1], "tmp0"), type(Types.Byte), "tmp1"))
+	addReturnCall(addStoreCall(addZext(
+		addIcmpCall(
+			Code.IcmpCall.Operator.EQ,
+			addLoadCall(arguments[0], "tmp0"),
+			addLoadCall(arguments[1], "tmp1"),
+			"tmp2"
+		),
+		type(Types.Byte).child,
+		"tmp3"
+	), addFunctionCall(
+		getFunctionByName("malloc")!!,
+		listOf(addPrimitive(primitive(Type.BuiltIn.Number.Integer(64)) { "1" })),
+		"tmp4"
+	)))
 }
 
 private fun Module.addNotFunction(function: Function) = functionImpl(function) {
-	addReturnCall(addZext(addIcmpCall(Code.IcmpCall.Operator.NE, arguments[0], addPrimitive(primitive(arguments[0].type) { "0" }), "tmp0"), type(
-		Types.Byte), "tmp0"))
+	addReturnCall(addStoreCall(
+		addZext(
+			addIcmpCall(
+				Code.IcmpCall.Operator.NE,
+				addLoadCall(arguments[0], "tmp0"),
+				addPrimitive(primitive(arguments[0].type) { "0" }),
+				"tmp1"
+			),
+			type(Types.Byte).child,
+			"tmp2"
+		),
+		addFunctionCall(
+			getFunctionByName("malloc")!!,
+			listOf(addPrimitive(primitive(Type.BuiltIn.Number.Integer(64)) { "1" })),
+			"tmp3"
+		)
+	))
 }
 
 private fun Module.addCastFunction(function: Function) = functionImpl(function) {
@@ -141,7 +169,7 @@ typealias OperationFunction = LlvmFunction.FunctionImplementation.(LlvmVariable,
 private fun Module.operation(function: Function, operation: OperationFunction) =
 	functionImpl(function) {
 		addReturnCall(addStoreCall(
-			operation(addLoadCall(arguments[0], "argv0"), addLoadCall(arguments[1], "argv0"), "result"),
+			operation(addLoadCall(arguments[0], "argv0"), addLoadCall(arguments[1], "argv1"), "result"),
 			addBitCast(addFunctionCall(
 				getFunctionByName("malloc")!!,
 				listOf(addPrimitive(primitive(Type.BuiltIn.Number.Integer(64)) {

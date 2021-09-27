@@ -12,6 +12,7 @@ fun main(): Long {
 	char = getChar();
 	if (equals(char, '0')) {
 		putChar('0');
+		putChar(10b);
 		return 0;
 	} else if (equals(char, '1')) {
 		infiniteOnes();
