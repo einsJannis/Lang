@@ -9,7 +9,8 @@ If you want examples of this language take a look into [this folder](example)
 
 ### Prerequisites
 
-First, grab yourself an executable, either by [compiling it yourself] or by [downloading a zip from releases].
+First, Make sure that you have the lastest version of Java installed. 
+Then grab yourself an executable, either by [compiling it yourself] or by [downloading a zip from releases].
 Then install a llvm compiler such as [clang].
 
 ### Program usage
