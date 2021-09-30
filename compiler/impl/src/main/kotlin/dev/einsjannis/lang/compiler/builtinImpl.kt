@@ -28,9 +28,11 @@ fun Module.initialize() {
 	addPutCharImport()
 	addGetCharImport()
 	addFreeImport()
+	addMalloc()
 	addPutChar()
 	addGetChar()
 	addFree()
+	addUnit()
 	operation(Functions.addByte, LlvmFunction.FunctionImplementation::addAddCall)
 	operation(Functions.addLong, LlvmFunction.FunctionImplementation::addAddCall)
 	operation(Functions.subByte, LlvmFunction.FunctionImplementation::addSubCall)
@@ -102,11 +104,28 @@ private fun Module.addFreeImport() =
 		addArgument("what", Type.BuiltIn.Number.Integer(8).ptr())
 	}
 
+private fun Module.addMalloc() = functionImpl(Functions.malloc) {
+	addReturnCall(addStoreCall(addFunctionCall(
+		getFunctionByName("malloc")!!,
+		listOf(addLoadCall(arguments[0], "tmp0")),
+		"tmp1"
+	), addFunctionCall(
+		getFunctionByName("malloc")!!,
+		listOf(addPrimitive(primitive(Type.BuiltIn.Number.Integer(64)) { "1" })),
+		"tmp2"
+	)))
+}
+
 private fun Module.addFree() =
 	functionImpl(Functions.free) {
 		addNotSavedFunctionCall(getFunctionByName("free")!!, listOf(addLoadCall(arguments[0], "ptr")))
+		addNotSavedFunctionCall(getFunctionByName("free")!!, listOf(arguments[0]))
 		addReturnCall(IRElement.Named.Null)
 	}
+
+private fun Module.addUnit() = functionImpl(Functions.unit) {
+	addReturnCall(IRElement.Named.Null)
+}
 
 private fun Module.addXAtFunction(function: Function) = functionImpl(function) {
 	addReturnCall(addLoadCall(addBitCast(arguments[0], returnType.ptr(), "ptr"), "result"))
