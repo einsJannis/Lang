@@ -3,6 +3,8 @@ package dev.einsjannis.lang.compiler
 object Functions {
 	val putChar = function("putChar", Types.Unit, variable("char", Types.Byte))
 	val getChar = function("getChar", Types.Byte)
+	val malloc = function("malloc", Types.Pointer, variable("size", Types.Long))
+	val unit = function("unit", Types.Unit)
 	val free = function("free", Types.Unit, variable("tofree", Types.Pointer))
 	private fun operation(type: Type, name: String) =
 		function(name, type, variable("arg0", type), variable("arg1", type))
@@ -41,7 +43,7 @@ object Functions {
 		function("not", Types.Byte, variable("arg0", Types.Long), variable("arg1", Types.Long))
 	val pointerToLong = function("pointerToLong", Types.Long, variable("pointer", Types.Pointer))
 	val longToPointer = function("longToPointer", Types.Pointer, variable("long", Types.Long))
-	val all: List<Function> = listOf(putChar, getChar, free, addLong, addByte, subLong, subByte, mulLong, mulByte,
+	val all: List<Function> = listOf(malloc, putChar, getChar, free, unit, addLong, addByte, subLong, subByte, mulLong, mulByte,
 		divLong, divByte, remLong, remByte, shlLong, shlByte, shrLong, shrByte, andLong, andByte, orLong, orByte,
 		xorLong, xorByte, byteAt, longAt, pointerAt, pointerOfByte, pointerOfLong, pointerOfPointer, equalByte,
 		equalLong, notByte, notLong, pointerToLong, longToPointer)
