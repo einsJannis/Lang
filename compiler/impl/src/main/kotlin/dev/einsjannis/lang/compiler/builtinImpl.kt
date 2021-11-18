@@ -109,17 +109,17 @@ private fun Module.addMalloc() = functionImpl(Functions.malloc) {
 		getFunctionByName("malloc")!!,
 		listOf(addLoadCall(arguments[0], "tmp0")),
 		"tmp1"
-	), addFunctionCall(
+	), addBitCast(addFunctionCall(
 		getFunctionByName("malloc")!!,
 		listOf(addPrimitive(primitive(Type.BuiltIn.Number.Integer(64)) { "1" })),
 		"tmp2"
-	)))
+	), Type.BuiltIn.Number.Integer(8).ptr().ptr(), "tmp3")))
 }
 
 private fun Module.addFree() =
 	functionImpl(Functions.free) {
 		addNotSavedFunctionCall(getFunctionByName("free")!!, listOf(addLoadCall(arguments[0], "ptr")))
-		addNotSavedFunctionCall(getFunctionByName("free")!!, listOf(arguments[0]))
+		addNotSavedFunctionCall(getFunctionByName("free")!!, listOf(addBitCast(arguments[0], Type.BuiltIn.Number.Integer(8).ptr(), "tmp0")))
 		addReturnCall(IRElement.Named.Null)
 	}
 
